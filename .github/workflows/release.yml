@@ -65,11 +65,25 @@ jobs:
           echo "AETHERVM_ROOT=$(cd "$(dirname "$hdr")/../.." && pwd)" >> $GITHUB_ENV
           ls "$(cd "$(dirname "$hdr")/../.." && pwd)"
 
+      - name: Locate MSVC link.exe / lib.exe (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'VC/Tools/MSVC/**/bin/Hostx64/x64' | Select-Object -First 1
+          "MSVC_LINK=$dir\link.exe"   >> $env:GITHUB_ENV
+          "MSVC_LIB=$dir\lib.exe"     >> $env:GITHUB_ENV
+          "Found: $dir"
+
       - name: Build bridge library
         shell: bash
         run: |
           echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
-          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT"
+          EXTRA=""
+          if [ -n "$MSVC_LINK" ]; then
+            EXTRA="-DLINKER=$MSVC_LINK -DARCHIVER=$MSVC_LIB"
+          fi
+          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT" $EXTRA
           cmake --build native/build --config Release
 
       - name: Collect library + AetherVM runtime

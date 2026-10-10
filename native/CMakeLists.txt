@@ -19,10 +19,16 @@ if(WIN32)
     # icpp 包内的 AetherVM.dll 无导入库;从导出表现场生成 AetherVM.lib
     find_file(AETHERVM_DLL AetherVM.dll PATHS ${AETHERVM_ROOT}/bin REQUIRED)
 
-    # 复用 MSVC 工具链的 link.exe / lib.exe
-    get_filename_component(_bindir "${CMAKE_LINKER}" DIRECTORY)
-    find_program(LINKER_TOOL link HINTS "${_bindir}" REQUIRED)
-    find_program(ARCHIVER_TOOL lib HINTS "${_bindir}" REQUIRED)
+    # LINKER/ARCHIVER 由 CI 侧用 vswhere 定位后传入,避免解析到 GNU coreutils 的 link.exe
+    if(NOT DEFINED LINKER OR NOT DEFINED ARCHIVER)
+        get_filename_component(_bindir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        find_program(LINKER_TOOL link HINTS "${_bindir}")
+        find_program(ARCHIVER_TOOL lib HINTS "${_bindir}")
+        set(LINKER "${LINKER_TOOL}")
+        set(ARCHIVER "${ARCHIVER_TOOL}")
+    endif()
+    message(STATUS "LINKER = ${LINKER}")
+    message(STATUS "ARCHIVER = ${ARCHIVER}")
 
     set(AETHERVM_IMPLIB "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.lib")
     add_custom_command(
