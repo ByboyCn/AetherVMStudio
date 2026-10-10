@@ -5,6 +5,13 @@ set(TMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/genwinlib")
 file(MAKE_DIRECTORY "${TMP_DIR}")
 set(DUMP_TXT "${TMP_DIR}/exports.txt")
 
+# 防御:剥掉路径两端可能被误带入的字面引号
+foreach(var IN ITEMS LINKER ARCHIVER DUMPBIN)
+    if("${${var}}" MATCHES "^\"|\"$")
+        string(REGEX REPLACE "^\"|\"$" "" ${var} "${${var}}")
+    endif()
+endforeach()
+
 if(NOT EXISTS "${LINKER}")
     message(FATAL_ERROR "LINKER 不存在: ${LINKER}")
 endif()
