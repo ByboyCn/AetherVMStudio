@@ -65,24 +65,23 @@ jobs:
           echo "AETHERVM_ROOT=$(cd "$(dirname "$hdr")/../.." && (pwd -W 2>/dev/null || pwd))" >> $GITHUB_ENV
           ls "$(cd "$(dirname "$hdr")/../.." && pwd)"
 
-      - name: Locate MSVC link.exe / lib.exe (Windows)
+      - name: Locate MSVC tools and generate AetherVM.lib (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $dir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'VC/Tools/MSVC/**/bin/Hostx64/x64' | Select-Object -First 1
-          "MSVC_LINK=$dir\link.exe"     >> $env:GITHUB_ENV
-          "MSVC_LIB=$dir\lib.exe"       >> $env:GITHUB_ENV
-          "MSVC_DUMPBIN=$dir\dumpbin.exe" >> $env:GITHUB_ENV
-          "Found: $dir"
+          & native/genwinlib.ps1 -Dll "aethervm/icpp-v0.4.0-windows-x86_64/bin/AetherVM.dll" `
+            -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherVM.lib"
+          "AETHERVM_IMPLIB=$(Resolve-Path native/prebuilt/AetherVM.lib)" >> $env:GITHUB_ENV
 
       - name: Build bridge library
         shell: bash
         run: |
           echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
           args=(-DAETHERVM_ROOT="$AETHERVM_ROOT" -DCMAKE_BUILD_TYPE=Release)
-          if [ -n "$MSVC_LINK" ]; then
-            args+=(-DLINKER="$MSVC_LINK" -DARCHIVER="$MSVC_LIB" -DDUMPBIN="$MSVC_DUMPBIN")
+          if [ -n "$AETHERVM_IMPLIB" ]; then
+            args+=(-DAETHERVM_IMPLIB="$AETHERVM_IMPLIB")
           fi
           cmake -S native -B native/build "${args[@]}"
           cmake --build native/build --config Release

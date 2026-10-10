@@ -16,42 +16,17 @@ add_library(aevm_bridge SHARED AetherVMBridge.cpp)
 target_include_directories(aevm_bridge PRIVATE ${AETHERVM_ROOT}/include)
 
 if(WIN32)
-    # icpp 包内的 AetherVM.dll 无导入库;从导出表现场生成 AetherVM.lib
-    find_file(AETHERVM_DLL AetherVM.dll PATHS ${AETHERVM_ROOT}/bin REQUIRED)
-    get_filename_component(AETHERVM_DLL "${AETHERVM_DLL}" ABSOLUTE)
-    message(STATUS "AETHERVM_DLL = ${AETHERVM_DLL}")
-    if(NOT EXISTS "${AETHERVM_DLL}")
-        message(FATAL_ERROR "AetherVM.dll 未找到: ${AETHERVM_DLL}")
+    # Windows:icpp 包内 AetherVM.dll 无导入库。
+    # CI 侧会先用 dumpbin+lib 生成 AetherVM.lib 并通过 -DAETHERVM_IMPLIB 传入;
+    # 本地开发可手动执行 native/genwinlib.ps1,或直接把 AetherVM.dll 拖到系统 PATH。
+    if(DEFINED AETHERVM_IMPLIB AND EXISTS "${AETHERVM_IMPLIB}")
+        message(STATUS "使用导入库: ${AETHERVM_IMPLIB}")
+        target_link_libraries(aevm_bridge PRIVATE "${AETHERVM_IMPLIB}")
+    else()
+        message(WARNING "未提供 AETHERVM_IMPLIB,尝试直接链接 DLL(MSVC link 可能拒绝)")
+        find_file(AETHERVM_DLL AetherVM.dll PATHS ${AETHERVM_ROOT}/bin REQUIRED)
+        target_link_libraries(aevm_bridge PRIVATE "${AETHERVM_DLL}")
     endif()
-
-    # LINKER/ARCHIVER 由 CI 侧用 vswhere 定位后传入,避免解析到 GNU coreutils 的 link.exe
-    if(NOT DEFINED LINKER OR NOT DEFINED ARCHIVER)
-        get_filename_component(_bindir "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        find_program(LINKER_TOOL link HINTS "${_bindir}")
-        find_program(ARCHIVER_TOOL lib HINTS "${_bindir}")
-        set(LINKER "${LINKER_TOOL}")
-        set(ARCHIVER "${ARCHIVER_TOOL}")
-    endif()
-    message(STATUS "LINKER = ${LINKER}")
-    message(STATUS "ARCHIVER = ${ARCHIVER}")
-
-    set(AETHERVM_IMPLIB "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.lib")
-    # DLL 复制到无空格的构建目录;工具路径通过环境变量传入
-    # (避免 MSBuild 自定义命令对带空格参数的引号拆分问题)
-    file(COPY_FILE "${AETHERVM_DLL}" "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.dll")
-    add_custom_command(
-        OUTPUT "${AETHERVM_IMPLIB}"
-        COMMAND "${CMAKE_COMMAND}" -D DLL="${CMAKE_CURRENT_BINARY_DIR}/AetherVM.dll"
-                -D OUT="${AETHERVM_IMPLIB}"
-                -P "${CMAKE_CURRENT_SOURCE_DIR}/genwinlib.cmake"
-        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.dll"
-        COMMENT "从 AetherVM.dll 生成导入库"
-        VERBATIM
-        ENVIRONMENT "LINKER=${LINKER}" "ARCHIVER=${ARCHIVER}" "DUMPBIN=${DUMPBIN}"
-    )
-    add_custom_target(aethervm_implib DEPENDS "${AETHERVM_IMPLIB}")
-    add_dependencies(aevm_bridge aethervm_implib)
-    target_link_libraries(aevm_bridge PRIVATE "${AETHERVM_IMPLIB}")
 else()
     find_library(AETHERVM_RUNTIME
         NAMES AetherVM
