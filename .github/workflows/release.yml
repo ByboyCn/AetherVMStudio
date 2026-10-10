@@ -91,12 +91,13 @@ jobs:
         run: |
           mkdir -p out
           find native/build -type f \( -name "aevm_bridge.dll" -o -name "libaevm_bridge.dylib" -o -name "libaevm_bridge.so" \) -exec cp {} out/ \;
-          # AetherVM 运行库与其依赖一并打包(应用按需加载)
+          # AetherVM 运行库、依赖与语义 bitcode 一并打包(应用按需加载)
           if [ "$RUNNER_OS" = "Windows" ]; then
-            cp "$AETHERVM_ROOT"/bin/{AetherVM.dll,AetherVMICPP.dll,AetherBinary.dll,LLVM-22.dll,c++.dll} out/ 2>/dev/null || \
-              cp "$AETHERVM_ROOT"/bin/*.dll out/
+            cp "$AETHERVM_ROOT"/bin/AetherVM.dll "$AETHERVM_ROOT"/bin/AetherBinary.dll out/
+            cp -r "$AETHERVM_ROOT"/bin/bitcode out/bitcode
           else
             cp "$AETHERVM_ROOT"/lib/libAetherVM.* "$AETHERVM_ROOT"/lib/libAetherBinary.* out/ 2>/dev/null || true
+            find "$AETHERVM_ROOT" -type d -name bitcode -exec cp -r {}/. out/bitcode \; 2>/dev/null || true
           fi
           ls -la out/
 
@@ -171,7 +172,7 @@ jobs:
         shell: bash
         run: |
           if [ -d engine_lib ] && [ -n "$(ls engine_lib 2>/dev/null)" ]; then
-            cp -v engine_lib/* publish/ 2>/dev/null || cp -v engine_lib/* publish/*.app/Contents/MacOS/ 2>/dev/null || true
+            cp -r engine_lib/. publish/
             echo "AetherVM bridge bundled"
           else
             echo "::notice::无引擎库,本包使用内置 DemoEngine"
@@ -201,7 +202,10 @@ jobs:
           mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
           cp publish/${{ env.APP_NAME }} "$APP/Contents/MacOS/${{ env.APP_NAME }}"
           # 引擎库与 AetherVM 运行库一并放进 .app
-          if [ -d engine_lib ]; then cp -v engine_lib/lib*.dylib "$APP/Contents/MacOS/" 2>/dev/null || true; fi
+          if [ -d engine_lib ]; then
+            cp -v engine_lib/lib*.dylib "$APP/Contents/MacOS/" 2>/dev/null || true
+            cp -r engine_lib/bitcode "$APP/Contents/MacOS/bitcode" 2>/dev/null || true
+          fi
           chmod +x "$APP/Contents/MacOS/"*
           cat > "$APP/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -240,7 +244,10 @@ jobs:
           dir="${{ env.APP_NAME }}-${{ matrix.rid }}"
           mkdir -p "$dir"
           cp publish/${{ env.APP_NAME }} "$dir/"
-          if [ -d engine_lib ]; then cp -v engine_lib/libaevm_bridge* "$dir/" 2>/dev/null || true; fi
+          if [ -d engine_lib ]; then
+            cp -v engine_lib/lib*.dylib "$dir/" 2>/dev/null || true
+            cp -r engine_lib/bitcode "$dir/bitcode" 2>/dev/null || true
+          fi
           chmod +x "$dir/${{ env.APP_NAME }}"
           cp AetherVMStudio.CS/README.md "$dir/使用说明.md"
           cat > "$dir/启动.sh" <<'SH'

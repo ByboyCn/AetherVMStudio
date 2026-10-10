@@ -16,12 +16,16 @@ add_library(aevm_bridge SHARED AetherVMBridge.cpp)
 target_include_directories(aevm_bridge PRIVATE ${AETHERVM_ROOT}/include)
 
 if(WIN32)
-    # Windows:icpp 包内 AetherVM.dll 无导入库。
-    # CI 侧会先用 dumpbin+lib 生成 AetherVM.lib 并通过 -DAETHERVM_IMPLIB 传入;
-    # 本地开发可手动执行 native/genwinlib.ps1,或直接把 AetherVM.dll 拖到系统 PATH。
+    # Windows:icpp 包内 AetherVM.dll / AetherBinary.dll 均无导入库。
+    # CI 侧会用 dumpbin+lib 生成 *.lib 并通过 -DAETHERVM_IMPLIB(分号分隔)传入;
+    # 本地开发可手动执行 native/genwinlib.ps1。
     if(DEFINED AETHERVM_IMPLIB AND EXISTS "${AETHERVM_IMPLIB}")
-        message(STATUS "使用导入库: ${AETHERVM_IMPLIB}")
-        target_link_libraries(aevm_bridge PRIVATE "${AETHERVM_IMPLIB}")
+        foreach(imp IN LISTS AETHERVM_IMPLIB)
+            if(EXISTS "${imp}")
+                message(STATUS "使用导入库: ${imp}")
+                target_link_libraries(aevm_bridge PRIVATE "${imp}")
+            endif()
+        endforeach()
     else()
         message(WARNING "未提供 AETHERVM_IMPLIB,尝试直接链接 DLL(MSVC link 可能拒绝)")
         find_file(AETHERVM_DLL AetherVM.dll PATHS ${AETHERVM_ROOT}/bin REQUIRED)

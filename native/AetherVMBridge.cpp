@@ -16,6 +16,7 @@
 
 #include <aevm/AetherVM.h>
 #include <aevm/Register.h>
+#include <AetherArch.h> // aether::MachineARM64 / MachineX86(AetherBinary)
 
 using TraceCb = void (*)(int kind, uint64_t addr, const char *text, void *user);
 
@@ -31,18 +32,19 @@ static constexpr uint64_t kCodeBase = 0x100000;
 
 struct BridgeEngine
 {
+    std::unique_ptr<aether::Machine> machine;
     aether::BinaryEngine engine;
-
-    BridgeEngine()
-        // opcode 直接执行模式:无 Binary 上下文,传空 Machine 指针
-        : engine(static_cast<aether::Machine *>(nullptr))
-    {
-    }
-
     TraceCb traceCb = nullptr;
     void *traceUser = nullptr;
     std::vector<uint8_t> code;
     bool finished = false;
+
+    explicit BridgeEngine(int arch)
+        : machine(arch == 1 ? static_cast<aether::Machine *>(new aether::MachineX86())
+                            : static_cast<aether::Machine *>(new aether::MachineARM64()))
+        , engine(machine.get())
+    {
+    }
 
     void emit(int kind, uint64_t addr, const std::string &text)
     {
@@ -53,9 +55,7 @@ struct BridgeEngine
 
 BRIDGE_API void *aevm_create(int arch)
 {
-    // [ADAPT] opcode 模式与宿主架构无关;arch 参数保留(0=ARM64, 1=x86_64)
-    (void)arch;
-    return new (std::nothrow) BridgeEngine();
+    return new (std::nothrow) BridgeEngine(arch);
 }
 
 BRIDGE_API void aevm_destroy(void *e)

@@ -1,0 +1,20 @@
+﻿Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	﻿2026-10-10T11:25:55.9928997Z ##[group]Run $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:55.9929764Z ^[[36;1m$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:55.9930683Z ^[[36;1m$dir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'VC/Tools/MSVC/**/bin/Hostx64/x64' | Select-Object -First 1^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:55.9931579Z ^[[36;1m& native/genwinlib.ps1 -Dll "aethervm/icpp-v0.4.0-windows-x86_64/bin/AetherVM.dll" `^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:55.9932183Z ^[[36;1m  -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherVM.lib"^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:55.9932759Z ^[[36;1m"AETHERVM_IMPLIB=$(Resolve-Path native/prebuilt/AetherVM.lib)" >> $env:GITHUB_ENV^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:56.0505474Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:56.0505926Z env:
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:56.0506218Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:56.0506654Z   APP_NAME: AetherVMStudio
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:56.0507142Z   AETHERVM_ROOT: D:/a/AetherVMStudio/AetherVMStudio/aethervm/icpp-v0.4.0-windows-x86_64
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:25:56.0507685Z ##[endgroup]
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.4764828Z 解析到 50 个导出符号
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.5745946Z C:\Users\RUNNER~1\AppData\Local\Temp\AetherVM.def(52) : fatal error LNK1118: syntax error in '.data5E000' statement
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.7379676Z ^[[31;1mException: ^[[0mD:\a\AetherVMStudio\AetherVMStudio\native\genwinlib.ps1:36^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.7381042Z ^[[31;1m^[[0m^[[36;1mLine |^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.7382101Z ^[[31;1m^[[0m^[[36;1m^[[36;1m  36 | ^[[0m if ($LASTEXITCODE -ne 0) { ^[[36;1mthrow "lib.exe 生成导入库失败"^[[0m }^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.7383211Z ^[[31;1m^[[0m^[[36;1m^[[36;1m^[[0m^[[36;1m^[[0m^[[36;1m     | ^[[31;1m                            ~~~~~~~~~~~~~~~~~~~~~~~^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.7384300Z ^[[31;1m^[[0m^[[36;1m^[[36;1m^[[0m^[[36;1m^[[0m^[[36;1m^[[31;1m^[[31;1m^[[36;1m     | ^[[31;1mlib.exe 生成导入库失败^[[0m
+Build AetherVM bridge (aevm_bridge-win-x64)	Locate MSVC tools and generate AetherVM.lib (Windows)	2026-10-10T11:26:00.7997207Z ##[error]Process completed with exit code 1.
