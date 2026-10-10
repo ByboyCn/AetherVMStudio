@@ -40,10 +40,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, artifact: aevm_bridge-win-x64,      icpp: icpp-v0.4.0-windows-x86_64.tar.gz }
-          - { os: macos-latest,   artifact: aevm_bridge-osx-arm64,    icpp: icpp-v0.4.0-macos-arm64.tar.gz }
-          - { os: ubuntu-latest,  artifact: aevm_bridge-linux-x64,    icpp: icpp-v0.4.0-linux-x86_64.tar.gz }
-          - { os: ubuntu-latest,  artifact: aevm_bridge-linux-arm64,  icpp: icpp-v0.4.0-linux-aarch64.tar.gz }
+          - { os: windows-latest,      artifact: aevm_bridge-win-x64,     icpp: icpp-v0.4.0-windows-x86_64.tar.gz }
+          - { os: macos-latest,        artifact: aevm_bridge-osx-arm64,   icpp: icpp-v0.4.0-macos-arm64.tar.gz }
+          - { os: ubuntu-latest,       artifact: aevm_bridge-linux-x64,   icpp: icpp-v0.4.0-linux-x86_64.tar.gz }
+          - { os: ubuntu-24.04-arm,    artifact: aevm_bridge-linux-arm64, icpp: icpp-v0.4.0-linux-aarch64.tar.gz }
     steps:
       - name: Checkout (with AetherVM v0.2.0 submodule)
         uses: actions/checkout@v4
