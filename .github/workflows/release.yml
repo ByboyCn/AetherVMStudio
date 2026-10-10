@@ -62,7 +62,7 @@ jobs:
           # 以 include/aevm/AetherVM.h 定位包根目录(各平台包布局一致)
           hdr="$(find aethervm -type f -name AetherVM.h -path '*aevm*' | head -1)"
           [ -z "$hdr" ] && { echo "::error::解包后未找到 include/aevm/AetherVM.h"; tar -tzf aethervm/icpp.tar.gz | head -10; exit 1; }
-          echo "AETHERVM_ROOT=$(cd "$(dirname "$hdr")/../.." && pwd)" >> $GITHUB_ENV
+          echo "AETHERVM_ROOT=$(cd "$(dirname "$hdr")/../.." && (pwd -W 2>/dev/null || pwd))" >> $GITHUB_ENV
           ls "$(cd "$(dirname "$hdr")/../.." && pwd)"
 
       - name: Locate MSVC link.exe / lib.exe (Windows)
