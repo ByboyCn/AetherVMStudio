@@ -187,7 +187,14 @@ jobs:
         shell: bash
         run: |
           if [ -d engine_lib ] && [ -n "$(ls engine_lib 2>/dev/null)" ]; then
-            cp -r engine_lib/. publish/
+            mkdir -p engine_pick
+            if [ "$RUNNER_OS" = "Windows" ]; then
+              find engine_lib -maxdepth 1 -type f \( -name "aevm_bridge.dll" -o -name "AetherVM.dll" -o -name "AetherBinary.dll" \) -exec cp {} engine_pick/ \;
+            else
+              find engine_lib -maxdepth 1 -type f \( -name "libaevm_bridge.*" -o -name "libAetherVM.*" -o -name "libAetherBinary.*" \) -exec cp {} engine_pick/ \;
+            fi
+            [ -d engine_lib/bitcode ] && cp -r engine_lib/bitcode engine_pick/bitcode
+            cp -r engine_pick/. publish/
             echo "AetherVM bridge bundled"
           else
             echo "::notice::无引擎库,本包使用内置 DemoEngine"
