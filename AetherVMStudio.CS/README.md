@@ -30,7 +30,34 @@ dotnet run
 > ```
 > 版本对应文档站所示 `0.1.1.24`(Chart `0.1.1.25`),或换成本地路径 `<ProjectReference>` / `Path` 形式。
 
-### 发布单文件跨平台包
+## 发布到 GitHub(私有仓库 + Actions 自动打包)
+
+本仓库自带 [.github/workflows/release.yml](../.github/workflows/release.yml),
+推送 tag `v*` 时会自动构建 **6 个平台包**并上传到 GitHub Release:
+
+| RID | 平台 | 包格式 |
+|---|---|---|
+| win-x64 / win-arm64 | Windows | .zip |
+| osx-x64 / osx-arm64 | macOS (Intel / Apple Silicon) | .zip |
+| linux-x64 / linux-arm64 | Linux | .tar.gz |
+
+首次发布步骤(本机已装 gh CLI):
+
+```sh
+# 1. 登录 GitHub(只需一次)
+gh auth login
+
+# 2. 创建私有仓库并推送(在仓库根目录执行)
+gh repo create AetherVMStudio --private --source . --push
+
+# 3. 发版:打 tag 即触发六平台构建 + Release 上传
+git tag v0.1.0
+git push origin main --tags
+```
+
+也可以在 GitHub 网页 Actions 页手动触发(workflow_dispatch),包会出现在 Actions Artifacts。
+
+### 本地手动打单文件包
 
 ```sh
 # macOS (Apple Silicon)
