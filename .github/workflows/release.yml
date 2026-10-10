@@ -73,6 +73,8 @@ jobs:
           $dir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'VC/Tools/MSVC/**/bin/Hostx64/x64' | Select-Object -First 1
           & native/genwinlib.ps1 -Dll "aethervm/icpp-v0.4.0-windows-x86_64/bin/AetherVM.dll" `
             -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherVM.lib"
+          & native/genwinlib.ps1 -Dll "aethervm/icpp-v0.4.0-windows-x86_64/bin/AetherBinary.dll" `
+            -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherBinary.lib"
           "AETHERVM_IMPLIB=$(Resolve-Path native/prebuilt/AetherVM.lib)" >> $env:GITHUB_ENV
 
       # Windows 必须用 icpp 自带的 clang(libc++ ABI 与 AetherVM.dll 匹配),不能用 MSVC STL
