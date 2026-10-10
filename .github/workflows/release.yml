@@ -75,16 +75,29 @@ jobs:
             -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherVM.lib"
           "AETHERVM_IMPLIB=$(Resolve-Path native/prebuilt/AetherVM.lib)" >> $env:GITHUB_ENV
 
-      - name: Build bridge library
+      # Windows 必须用 icpp 自带的 clang(libc++ ABI 与 AetherVM.dll 匹配),不能用 MSVC STL
+      - name: Build bridge library (Windows, icpp clang++)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          & "$env:AETHERVM_ROOT/bin/clang++.exe" -std=c++20 -shared -o out/aevm_bridge.dll `
+            native/AetherVMBridge.cpp `
+            -I "$env:AETHERVM_ROOT/include" -I "$env:AETHERVM_ROOT/include/aebi" `
+            -nostdinc++ -isystem "$env:AETHERVM_ROOT/include/c++/v1" `
+            native/prebuilt/AetherVM.lib native/prebuilt/AetherBinary.lib "$env:AETHERVM_ROOT/lib/c++.lib" `
+            -Wno-everything
+          if ($LASTEXITCODE -ne 0) { throw "clang++ build failed" }
+
+      - name: Build bridge library (macOS/Linux, cmake)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
           args=(-DAETHERVM_ROOT="$AETHERVM_ROOT" -DCMAKE_BUILD_TYPE=Release)
-          if [ -n "$AETHERVM_IMPLIB" ]; then
-            args+=(-DAETHERVM_IMPLIB="$AETHERVM_IMPLIB")
-          fi
           cmake -S native -B native/build "${args[@]}"
           cmake --build native/build --config Release
+          mkdir -p out
+          find native/build -type f -name "libaevm_bridge.*" -exec cp {} out/ \;
 
       - name: Collect library + AetherVM runtime
         shell: bash

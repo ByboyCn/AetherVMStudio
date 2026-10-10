@@ -40,6 +40,12 @@ else()
         PATHS ${AETHERVM_ROOT}/lib ${AETHERVM_ROOT}/bin
         REQUIRED
     )
-    target_link_libraries(aevm_bridge PRIVATE ${AETHERVM_RUNTIME})
+    find_library(AETHERBINARY_RUNTIME
+        NAMES AetherBinary
+        PATHS ${AETHERVM_ROOT}/lib ${AETHERVM_ROOT}/bin
+        REQUIRED
+    )
+    target_link_libraries(aevm_bridge PRIVATE ${AETHERVM_RUNTIME} ${AETHERBINARY_RUNTIME})
     message(STATUS "AetherVM runtime: ${AETHERVM_RUNTIME}")
+    message(STATUS "AetherBinary runtime: ${AETHERBINARY_RUNTIME}")
 endif()
