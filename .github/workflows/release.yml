@@ -79,11 +79,9 @@ jobs:
         shell: bash
         run: |
           echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
-          EXTRA=""
-          if [ -n "$MSVC_LINK" ]; then
-            EXTRA="-DLINKER=$MSVC_LINK -DARCHIVER=$MSVC_LIB"
-          fi
-          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT" $EXTRA
+          echo "MSVC_LINK=$MSVC_LINK"
+          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT" \
+            ${MSVC_LINK:+-DLINKER="$MSVC_LINK" -DARCHIVER="$MSVC_LIB"}
           cmake --build native/build --config Release
 
       - name: Collect library + AetherVM runtime
