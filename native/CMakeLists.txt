@@ -36,18 +36,18 @@ if(WIN32)
     message(STATUS "ARCHIVER = ${ARCHIVER}")
 
     set(AETHERVM_IMPLIB "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.lib")
+    # DLL 复制到无空格的构建目录;工具路径通过环境变量传入
+    # (避免 MSBuild 自定义命令对带空格参数的引号拆分问题)
+    file(COPY_FILE "${AETHERVM_DLL}" "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.dll")
     add_custom_command(
         OUTPUT "${AETHERVM_IMPLIB}"
-        COMMAND "${CMAKE_COMMAND}"
-                -D DLL="${AETHERVM_DLL}"
-                -D LINKER="${LINKER}"
-                -D ARCHIVER="${ARCHIVER}"
-                -D DUMPBIN="${DUMPBIN}"
+        COMMAND "${CMAKE_COMMAND}" -D DLL="${CMAKE_CURRENT_BINARY_DIR}/AetherVM.dll"
                 -D OUT="${AETHERVM_IMPLIB}"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/genwinlib.cmake"
-        DEPENDS "${AETHERVM_DLL}"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/AetherVM.dll"
         COMMENT "从 AetherVM.dll 生成导入库"
         VERBATIM
+        ENVIRONMENT "LINKER=${LINKER}" "ARCHIVER=${ARCHIVER}" "DUMPBIN=${DUMPBIN}"
     )
     add_custom_target(aethervm_implib DEPENDS "${AETHERVM_IMPLIB}")
     add_dependencies(aevm_bridge aethervm_implib)

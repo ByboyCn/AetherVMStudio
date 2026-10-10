@@ -7,8 +7,10 @@ set(DUMP_TXT "${TMP_DIR}/exports.txt")
 
 # 防御:剥掉路径两端可能被误带入的字面引号
 foreach(var IN ITEMS LINKER ARCHIVER DUMPBIN)
-    if("${${var}}" MATCHES "^\"|\"$")
-        string(REGEX REPLACE "^\"|\"$" "" ${var} "${${var}}")
+    if("$ENV{${var}}" MATCHES "^\"|\"$")
+        string(REGEX REPLACE "^\"|\"$" "" ${var} "$ENV{${var}}")
+    else()
+        set(${var} "$ENV{${var}}")
     endif()
 endforeach()
 
