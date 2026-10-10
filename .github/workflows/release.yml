@@ -105,7 +105,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p out
-          find native/build -type f \( -name "aevm_bridge.dll" -o -name "libaevm_bridge.dylib" -o -name "libaevm_bridge.so" \) -exec cp {} out/ \;
+          find native/build -type f \( -name "libaevm_bridge.*" \) -exec cp {} out/ \; 2>/dev/null || true
           # AetherVM 运行库、依赖与语义 bitcode 一并打包(应用按需加载)
           if [ "$RUNNER_OS" = "Windows" ]; then
             cp "$AETHERVM_ROOT"/bin/AetherVM.dll "$AETHERVM_ROOT"/bin/AetherBinary.dll out/
