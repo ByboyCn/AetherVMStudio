@@ -80,9 +80,11 @@ jobs:
         shell: bash
         run: |
           echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
-          echo "MSVC_LINK=$MSVC_LINK"
-          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT" \
-            ${MSVC_LINK:+-DLINKER="$MSVC_LINK" -DARCHIVER="$MSVC_LIB" -DDUMPBIN="$MSVC_DUMPBIN"}
+          args=(-DAETHERVM_ROOT="$AETHERVM_ROOT" -DCMAKE_BUILD_TYPE=Release)
+          if [ -n "$MSVC_LINK" ]; then
+            args+=(-DLINKER="$MSVC_LINK" -DARCHIVER="$MSVC_LIB" -DDUMPBIN="$MSVC_DUMPBIN")
+          fi
+          cmake -S native -B native/build "${args[@]}"
           cmake --build native/build --config Release
 
       - name: Collect library + AetherVM runtime
