@@ -59,8 +59,10 @@ jobs:
           curl -L --fail --retry 3 -o aethervm/icpp.tar.gz \
             "https://github.com/vpand/icpp/releases/download/v0.4.0/${{ matrix.icpp }}"
           tar -xzf aethervm/icpp.tar.gz -C aethervm
-          root="$(find aethervm -maxdepth 1 -type d -name 'icpp-*' | head -1)"
-          echo "AETHERVM_ROOT=$(cd "$root" && pwd)" >> $GITHUB_ENV
+          # 以 include/aevm/AetherVM.h 定位包根目录(各平台包布局一致)
+          hdr="$(find aethervm -type f -name AetherVM.h -path '*aevm*' | head -1)"
+          [ -z "$hdr" ] && { echo "::error::解包后未找到 include/aevm/AetherVM.h"; tar -tzf aethervm/icpp.tar.gz | head -10; exit 1; }
+          echo "AETHERVM_ROOT=$(cd "$(dirname "$hdr")/../.." && pwd)" >> $GITHUB_ENV
           ls "$AETHERVM_ROOT"
 
       - name: Build bridge library
