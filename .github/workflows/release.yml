@@ -28,11 +28,11 @@ permissions:
 
 jobs:
   # ============ AetherVM C++ 桥接库构建 ============
-  # 克隆 AetherVM 并用 ICPP 构建,再编译 native/AetherVMBridge.cpp 得到
+  # 下载 AetherVM 官方预编译包(v0.1.0),再编译 native/AetherVMBridge.cpp 得到
   # aevm_bridge.dll / libaevm_bridge.dylib / libaevm_bridge.so。
   # 任何一步失败都不阻塞发布(应用自动回退到内置 DemoEngine)。
   engine:
-    name: Build AetherVM bridge (${{ matrix.os }})
+    name: Build AetherVM bridge (${{ matrix.artifact }})
     if: ${{ github.event_name == 'push' || github.event.inputs.bundle_engine == 'true' }}
     runs-on: ${{ matrix.os }}
     continue-on-error: true
@@ -40,40 +40,33 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, artifact: aevm_bridge-win-x64 }
-          - { os: macos-latest,   artifact: aevm_bridge-osx-arm64 }
-          - { os: ubuntu-latest,  artifact: aevm_bridge-linux-x64 }
+          - { os: windows-latest, artifact: aevm_bridge-win-x64,      pkg: AetherVM-v0.1.0-windows-x86_64.tar.gz }
+          - { os: macos-latest,   artifact: aevm_bridge-osx-arm64,    pkg: AetherVM-v0.1.0-macos-arm64.tar.gz }
+          - { os: ubuntu-latest,  artifact: aevm_bridge-linux-x64,    pkg: AetherVM-v0.1.0-linux-x86_64.tar.gz }
+          - { os: ubuntu-latest,  artifact: aevm_bridge-linux-arm64,  pkg: AetherVM-v0.1.0-linux-aarch64.tar.gz }
     steps:
-      - name: Checkout (with AetherVM submodule)
+      - name: Checkout (with AetherVM submodule headers)
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Clone build toolchain (icpp + AetherBinary)
+      # 从源码构建 AetherVM 需要 icpp 自举链,过于复杂;
+      # 这里使用官方预编译包(https://github.com/AetherVM/AetherVM/releases)
+      - name: Download prebuilt AetherVM package
         shell: bash
         run: |
-          git clone --depth 1 https://github.com/vpand/icpp.git "$RUNNER_TEMP/icpp" || echo "::warning::icpp clone failed"
-          # AetherVM 构建要求 AetherBinary 与 AetherVM 同级目录
-          git clone --depth 1 https://github.com/AetherVM/AetherBinary.git native/../AetherBinary || echo "::warning::AetherBinary clone failed"
-          ls native/AetherVM 2>/dev/null || true
-
-      - name: Build AetherVM (icpp)
-        shell: bash
-        run: |
-          ICPP=""
-          for cand in "$RUNNER_TEMP/icpp/icpp" "$RUNNER_TEMP/icpp/bin/icpp" icpp; do
-            if command -v $cand >/dev/null 2>&1 || [ -x "$cand" ]; then ICPP=$cand; break; fi
-          done
-          [ -z "$ICPP" ] && { echo "::warning::未找到 icpp,跳过引擎构建"; exit 1; }
-          # [ADAPT] ICPP 需要 LLVM/CMake/Ninja 环境;Windows runner 由 MSVC 自带
-          cd native/AetherVM
-          $ICPP build.cc
+          mkdir -p aethervm && cd aethervm
+          curl -L --fail --retry 3 -o pkg.tar.gz \
+            "https://github.com/AetherVM/AetherVM/releases/download/v0.1.0/${{ matrix.pkg }}"
+          tar -xzf pkg.tar.gz
+          echo "AETHERVM_ROOT=$(pwd)/$(find . -maxdepth 2 -type d -name install | head -1 | sed 's|^\./||')" >> $GITHUB_ENV
+          find . -maxdepth 3 | head -30
 
       - name: Build bridge library
         shell: bash
         run: |
-          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release \
-            -DAETHERVM_ROOT="$(pwd)/native/AetherVM/build-Release/install"
+          echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
+          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT"
           cmake --build native/build --config Release
 
       - name: Collect library
