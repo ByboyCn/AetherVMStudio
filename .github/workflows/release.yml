@@ -50,42 +50,38 @@ jobs:
         with:
           submodules: recursive
 
-      # AetherVM 构建要求 AetherBinary 与 AetherVM 同级目录
-      - name: Clone AetherBinary (sibling of submodule)
-        shell: bash
-        run: git clone --depth 1 https://github.com/AetherVM/AetherBinary.git native/AetherBinary
-
-      - name: Download prebuilt icpp (bootstrap toolchain)
+      # icpp 预编译包内含 v0.2.0 的 AetherVM 头文件(include/aevm)与动态库(bin|lib),
+      # 无需从源码构建引擎;桥接层直接对 AetherVM 动态库链接。
+      - name: Download icpp package (with AetherVM runtime)
         shell: bash
         run: |
-          mkdir -p icpp && cd icpp
-          curl -L --fail --retry 3 -o icpp.tar.gz \
+          mkdir -p aethervm
+          curl -L --fail --retry 3 -o aethervm/icpp.tar.gz \
             "https://github.com/vpand/icpp/releases/download/v0.4.0/${{ matrix.icpp }}"
-          tar -xzf icpp.tar.gz
-          find . -maxdepth 3 | head -30
-          echo "ICPP_BIN=$(pwd)/$(find . -type f -name icpp | head -1 | sed 's|^\./||')" >> $GITHUB_ENV
-
-      - name: Build AetherVM (v0.2.0 from submodule)
-        shell: bash
-        run: |
-          echo "icpp binary: $ICPP_BIN"
-          chmod +x "$ICPP_BIN" || true
-          # Windows 下 icpp 需要 MSVC 环境,GitHub runner 的开发者命令环境自动可用
-          cd native/AetherVM
-          "$ICPP_BIN" build.cc
+          tar -xzf aethervm/icpp.tar.gz -C aethervm
+          root="$(find aethervm -maxdepth 1 -type d -name 'icpp-*' | head -1)"
+          echo "AETHERVM_ROOT=$(cd "$root" && pwd)" >> $GITHUB_ENV
+          ls "$AETHERVM_ROOT"
 
       - name: Build bridge library
         shell: bash
         run: |
-          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release \
-            -DAETHERVM_ROOT="$(pwd)/native/AetherVM/build-Release/install"
+          echo "Using AETHERVM_ROOT=$AETHERVM_ROOT"
+          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT"
           cmake --build native/build --config Release
 
-      - name: Collect library
+      - name: Collect library + AetherVM runtime
         shell: bash
         run: |
           mkdir -p out
           find native/build -type f \( -name "aevm_bridge.dll" -o -name "libaevm_bridge.dylib" -o -name "libaevm_bridge.so" \) -exec cp {} out/ \;
+          # AetherVM 运行库与其依赖一并打包(应用按需加载)
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp "$AETHERVM_ROOT"/bin/{AetherVM.dll,AetherVMICPP.dll,AetherBinary.dll,LLVM-22.dll,c++.dll} out/ 2>/dev/null || \
+              cp "$AETHERVM_ROOT"/bin/*.dll out/
+          else
+            cp "$AETHERVM_ROOT"/lib/libAetherVM.* "$AETHERVM_ROOT"/lib/libAetherBinary.* out/ 2>/dev/null || true
+          fi
           ls -la out/
 
       - name: Upload bridge library
@@ -188,8 +184,8 @@ jobs:
           APP="${{ env.APP_NAME }}.app"
           mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
           cp publish/${{ env.APP_NAME }} "$APP/Contents/MacOS/${{ env.APP_NAME }}"
-          # 引擎库放进 .app(应用按自身目录探测 libaevm_bridge.dylib)
-          if [ -d engine_lib ]; then cp -v engine_lib/libaevm_bridge* "$APP/Contents/MacOS/" 2>/dev/null || true; fi
+          # 引擎库与 AetherVM 运行库一并放进 .app
+          if [ -d engine_lib ]; then cp -v engine_lib/lib*.dylib "$APP/Contents/MacOS/" 2>/dev/null || true; fi
           chmod +x "$APP/Contents/MacOS/"*
           cat > "$APP/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
