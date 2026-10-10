@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <span>
 #include <string>
 #include <vector>
@@ -30,7 +31,14 @@ static constexpr uint64_t kCodeBase = 0x100000;
 
 struct BridgeEngine
 {
-    aether::BinaryEngine engine{nullptr}; // opcode 模式,无 Binary 上下文
+    aether::BinaryEngine engine;
+
+    BridgeEngine()
+        // opcode 直接执行模式:无 Binary 上下文,传空 Machine 指针
+        : engine(static_cast<aether::Machine *>(nullptr))
+    {
+    }
+
     TraceCb traceCb = nullptr;
     void *traceUser = nullptr;
     std::vector<uint8_t> code;
