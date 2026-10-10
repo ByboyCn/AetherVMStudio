@@ -13,7 +13,10 @@ message(STATUS "AETHERVM_ROOT = ${AETHERVM_ROOT}")
 
 add_library(aevm_bridge SHARED AetherVMBridge.cpp)
 
-target_include_directories(aevm_bridge PRIVATE ${AETHERVM_ROOT}/include)
+target_include_directories(aevm_bridge PRIVATE
+    ${AETHERVM_ROOT}/include
+    ${AETHERVM_ROOT}/include/aebi
+)
 
 if(WIN32)
     # Windows:icpp 包内 AetherVM.dll / AetherBinary.dll 均无导入库。
