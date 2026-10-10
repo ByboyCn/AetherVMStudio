@@ -22,12 +22,15 @@ public static class Program
                 resizable: true);
 
             var vm = new EmulationViewModel();
-            var main = new MainWindow(vm);
+            var main = new MainWindow(vm, window);
             window.Manager.Root.AddChild(main.Build());
 
             vm.StatusChanged += msg => main.UpdateStatus(msg);
 
             window.Show();
+
+            // 初始化一次引擎,让寄存器面板显示默认值
+            vm.Load();
         }));
     }
 }

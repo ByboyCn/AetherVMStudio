@@ -7,93 +7,226 @@ using TCYM.UI.Elements.Input;
 namespace AetherVMStudio.UI;
 
 /// <summary>
-/// 用 TCYM.UI 组件树搭建主界面(CSS flex 布局)。
-/// 结构:
-///   ┌──────────────────────────────────────────────┐
-///   │ 顶栏:架构切换 / 运行 / 单步 / 重置 / 状态      │
-///   ├──────────────┬───────────────────────────────┤
-///   │ 左栏          │ 寄存器面板                     │
-///   │  · 文件路径    ├───────────────────────────────┤
-///   │  · 代码编辑    │ Trace / 寄存器趋势图 / 内存     │
-///   │  · 初始寄存器  │                               │
-///   │  · 事件开关    │                               │
-///   └──────────────┴───────────────────────────────┘
+/// 用 TCYM.UI 组件树搭建主界面(日间/夜间/自动主题)。
+/// 注意:样式对象必须先完整构建再一次性赋给 element.Style(setter 赋值时快照合并)。
 /// </summary>
 public sealed class MainWindow
 {
     private readonly EmulationViewModel _vm;
+    private readonly UIWindow _window;
+
+    private ThemeMode _mode = ThemeMode.Auto;
+    private AppTheme T => AppTheme.Resolve(_mode);
 
     private UILabel _statusLabel = null!;
     private UIButton _archArmButton = null!;
     private UIButton _archX86Button = null!;
+    private UIButton _themeButton = null!;
     private UILabel _registerLabel = null!;
     private UILabel _traceLabel = null!;
     private UILabel _memoryLabel = null!;
     private UILabel _consoleLabel = null!;
+    private readonly List<(UILabel Label, EventConfig Flag)> _eventChips = new();
 
-    public MainWindow(EmulationViewModel vm)
+    public MainWindow(EmulationViewModel vm, UIWindow window)
     {
         _vm = vm;
-        _vm.StateChanged += () => RefreshDynamicViews();
+        _window = window;
+        _vm.StateChanged += RefreshDynamicViews;
     }
 
-    public void UpdateStatus(string msg)
+    public void UpdateStatus(string msg) => _statusLabel.Text = msg;
+
+    // ============ 主题 ============
+
+    private string ThemeButtonLabel => _mode switch
     {
-        _statusLabel.Text = msg;
-        _statusLabel.Style!.Color = msg.StartsWith("❌") ? SKColor.Parse("#e5484d") : SKColor.Parse("#3fb950");
+        ThemeMode.Light => "☀ 日间",
+        ThemeMode.Dark => "🌙 夜间",
+        _ => AppTheme.Resolve(ThemeMode.Auto).Name == "夜间" ? "🌓 自动·夜" : "🌓 自动·日",
+    };
+
+    private void CycleTheme()
+    {
+        _mode = _mode switch
+        {
+            ThemeMode.Auto => ThemeMode.Light,
+            ThemeMode.Light => ThemeMode.Dark,
+            _ => ThemeMode.Auto,
+        };
+        Rebuild();
     }
+
+    /// <summary>主题切换后整棵 UI 树重建。</summary>
+    private void Rebuild()
+    {
+        var root = _window.Manager.Root;
+        root.Children.Clear();
+        _eventChips.Clear();
+        root.AddChild(Build());
+        RefreshDynamicViews();
+        _statusLabel.Text = _vm.StatusMessage;
+    }
+
+    // ============ 样式构建辅助 ============
+
+    private DefaultUIStyle Flex(string direction, string? align = null) => new()
+    {
+        Display = "flex",
+        FlexDirection = direction,
+        AlignItems = align ?? "stretch",
+    };
+
+    private UIView Panel(DefaultUIStyle style) => new() { Style = style };
+
+    private UILabel Title(string text) => new()
+    {
+        Text = text,
+        Style = new DefaultUIStyle
+        {
+            FontSize = 13,
+            Color = T.TitleColor,
+            MarginTop = 6,
+            MarginBottom = 6,
+        },
+    };
+
+    private UILabel Mono(string text, float size = 12) => new()
+    {
+        Text = text,
+        Wrap = true,
+        Style = new DefaultUIStyle
+        {
+            FontSize = size,
+            Color = T.TextSecondary,
+        },
+    };
+
+    private UIScrollView ScrollBox(float height)
+    {
+        var box = new UIScrollView
+        {
+            Style = new DefaultUIStyle
+            {
+                Display = "flex",
+                FlexDirection = "column",
+                Height = height,
+                BackgroundColor = T.BoxBg,
+                BorderRadius = 6,
+                BorderWidth = 1,
+                BorderColor = T.Border,
+                PaddingTop = 8, PaddingBottom = 8, PaddingLeft = 10, PaddingRight = 10,
+                MarginBottom = 8,
+            },
+        };
+        return box;
+    }
+
+    /// <summary>把长文本放进 ScrollView 内部的纵向容器,保证逐行排列且可滚动。</summary>
+    private UIView ScrollContent(UILabel content)
+    {
+        var inner = Panel(Flex("column"));
+        inner.AddChild(content);
+        return inner;
+    }
+
+    private UIButton TextButton(string text, string bg, string fg, Action onClick)
+    {
+        var btn = new UIButton
+        {
+            Text = text,
+            Style = new DefaultUIStyle
+            {
+                BackgroundColor = SKColor.Parse(bg),
+                Color = SKColor.Parse(fg),
+                BorderRadius = 6,
+                PaddingTop = 6, PaddingBottom = 6, PaddingLeft = 14, PaddingRight = 14,
+                MarginRight = 6,
+                FontSize = 13,
+            },
+        };
+        btn.OnClick += _ => onClick();
+        return btn;
+    }
+
+    private UITextArea MakeEditor(string text, string placeholder, int rows, float height, Action<string> onChange) =>
+        new()
+        {
+            Text = text,
+            Placeholder = placeholder,
+            Rows = rows,
+            Style = new DefaultUIStyle { MarginBottom = 8, Height = height },
+            InputBackground = T.InputBg,
+            InputTextColor = T.TextSecondary,
+            InputBorderColor = T.InputBorder,
+            InputFocusBorderColor = T.InputFocusBorder,
+            CursorColor = T.Accent,
+        };
+
+    // ============ 主结构 ============
 
     public UIView Build()
     {
-        var root = new UIView();
-        var s = root.Style ??= new DefaultUIStyle();
-        s.Display = "flex";
-        s.FlexDirection = "column";
-        s.Width = UnitValue.FromPercent(100f);
-        s.Height = UnitValue.FromPercent(100f);
-        s.BackgroundColor = SKColor.Parse("#161b22");
-        s.PaddingTop = 8;
-        s.PaddingLeft = 8;
-        s.PaddingRight = 8;
-        s.PaddingBottom = 8;
+        var rootStyle = Flex("column");
+        rootStyle.Width = UnitValue.FromPercent(100f);
+        rootStyle.Height = UnitValue.FromPercent(100f);
+        rootStyle.BackgroundColor = T.WindowBg;
+        rootStyle.PaddingTop = 10; rootStyle.PaddingLeft = 10;
+        rootStyle.PaddingRight = 10; rootStyle.PaddingBottom = 8;
 
+        var root = Panel(rootStyle);
         root.AddChild(BuildTopBar());
         root.AddChild(BuildBody());
         root.AddChild(BuildStatusBar());
         return root;
     }
 
-    // ============ 顶栏 ============
-
     private UIView BuildTopBar()
     {
-        var bar = Panel("row");
-        bar.Style!.Height = 46;
-        bar.Style.AlignItems = "center";
-        bar.Style.PaddingBottom = 8;
+        var barStyle = Flex("row", "center");
+        barStyle.Height = 48;
+        barStyle.PaddingBottom = 8;
 
-        var title = new UILabel
+        var bar = Panel(barStyle);
+        bar.AddChild(new UILabel
         {
             Text = "⚡ AetherVM Studio",
-        };
-        var ts = title.Style ??= new DefaultUIStyle();
-        ts.FontSize = 18;
-        ts.Color = SKColor.Parse("#e6edf3");
-        ts.MarginRight = 24;
-        bar.AddChild(title);
+            Style = new DefaultUIStyle
+            {
+                FontSize = 18,
+                Color = T.TextPrimary,
+                MarginRight = 24,
+            },
+        });
 
         _archArmButton = ArchButton("ARM64", GuestArch.Arm64);
         _archX86Button = ArchButton("x86_64", GuestArch.X86_64);
         bar.AddChild(_archArmButton);
         bar.AddChild(_archX86Button);
 
-        bar.AddChild(Spacer());
+        bar.AddChild(Panel(new DefaultUIStyle { FlexGrow = 1 }));
 
-        bar.AddChild(ActionButton("▶ 运行", "#238636", () => _vm.Run()));
-        bar.AddChild(ActionButton("⏭ 单步", "#1f6feb", () => _vm.Step()));
-        bar.AddChild(ActionButton("↺ 重置", "#6e7681", () => _vm.Reset()));
+        bar.AddChild(TextButton("▶ 运行", "#238636", "#ffffff", () => _vm.Run()));
+        bar.AddChild(TextButton("⏭ 单步", SKColorToHex(T.Accent), "#ffffff", () => _vm.Step()));
+        bar.AddChild(TextButton("↺ 重置", SKColorToHex(T.Border), SKColorToHex(T.TextSecondary), () => _vm.Reset()));
+
+        _themeButton = TextButton(ThemeButtonLabel, SKColorToHex(T.PanelBg), SKColorToHex(T.TextPrimary), CycleTheme);
+        _themeButton.Style = new DefaultUIStyle
+        {
+            BackgroundColor = T.PanelBg,
+            Color = T.TextPrimary,
+            BorderRadius = 6,
+            BorderWidth = 1,
+            BorderColor = T.Border,
+            PaddingTop = 6, PaddingBottom = 6, PaddingLeft = 14, PaddingRight = 14,
+            FontSize = 13,
+        };
+        _themeButton.OnClick += _ => CycleTheme();
+        bar.AddChild(_themeButton);
         return bar;
     }
+
+    private static string SKColorToHex(SKColor c) => $"#{c.Red:X2}{c.Green:X2}{c.Blue:X2}";
 
     private UIButton ArchButton(string text, GuestArch arch)
     {
@@ -104,40 +237,38 @@ public sealed class MainWindow
             UpdateArchButtons();
             _vm.Load();
         };
-        UpdateArchButtonStyle(btn, _vm.Arch == arch);
+        ApplyArchStyle(btn, _vm.Arch == arch);
         return btn;
+    }
+
+    private void ApplyArchStyle(UIButton btn, bool active)
+    {
+        btn.Style = new DefaultUIStyle
+        {
+            BackgroundColor = active ? T.Accent : T.PanelBg,
+            Color = active ? T.ChipActiveText : T.TextMuted,
+            BorderRadius = 6,
+            BorderWidth = 1,
+            BorderColor = T.Border,
+            PaddingTop = 6, PaddingBottom = 6, PaddingLeft = 14, PaddingRight = 14,
+            MarginRight = 6,
+            FontSize = 13,
+        };
     }
 
     private void UpdateArchButtons()
     {
-        UpdateArchButtonStyle(_archArmButton, _vm.Arch == GuestArch.Arm64);
-        UpdateArchButtonStyle(_archX86Button, _vm.Arch == GuestArch.X86_64);
+        ApplyArchStyle(_archArmButton, _vm.Arch == GuestArch.Arm64);
+        ApplyArchStyle(_archX86Button, _vm.Arch == GuestArch.X86_64);
     }
-
-    private static void UpdateArchButtonStyle(UIButton btn, bool active)
-    {
-        var st = btn.Style ??= new DefaultUIStyle();
-        st.BackgroundColor = SKColor.Parse(active ? "#1f6feb" : "#21262d");
-        st.Color = SKColor.Parse(active ? "#ffffff" : "#8b949e");
-        st.BorderRadius = 6;
-        st.BorderWidth = 1;
-        st.BorderColor = SKColor.Parse("#30363d");
-        st.PaddingTop = 6;
-        st.PaddingBottom = 6;
-        st.PaddingLeft = 14;
-        st.PaddingRight = 14;
-        st.MarginRight = 6;
-        st.FontSize = 13;
-    }
-
-    // ============ 主体 ============
 
     private UIView BuildBody()
     {
-        var body = Panel("row");
-        body.Style!.FlexGrow = 1;
-        body.Style.Overflow = "hidden";
+        var bodyStyle = Flex("row");
+        bodyStyle.FlexGrow = 1;
+        bodyStyle.Overflow = "hidden";
 
+        var body = Panel(bodyStyle);
         body.AddChild(BuildLeftPanel());
         body.AddChild(BuildRightPanel());
         return body;
@@ -145,63 +276,72 @@ public sealed class MainWindow
 
     private UIView BuildLeftPanel()
     {
-        var left = Panel("column");
-        left.Style!.Width = 400;
-        left.Style.MarginRight = 8;
+        var leftStyle = Flex("column");
+        leftStyle.Width = 400;
+        leftStyle.MarginRight = 8;
+        leftStyle.OverflowY = "auto";
 
-        left.AddChild(CardTitle("代码 (Shellcode)"));
+        var left = Panel(leftStyle);
+        left.AddChild(Title("代码 (Shellcode)"));
 
         // 文件路径行
-        var fileRow = Panel("row");
-        fileRow.Style!.MarginBottom = 6;
-        var pathInput = new UIInput { Text = _vm.FilePathText, Placeholder = "输入 .bin 文件路径…" };
-        var ps = pathInput.Style ??= new DefaultUIStyle();
-        ps.FlexGrow = 1;
-        ps.FontSize = 12;
+        var fileRowStyle = Flex("row", "center");
+        fileRowStyle.MarginBottom = 6;
+        var fileRow = Panel(fileRowStyle);
+
+        var pathInput = new UIInput
+        {
+            Text = _vm.FilePathText,
+            Placeholder = "输入 .bin 文件路径…",
+            Style = new DefaultUIStyle
+            {
+                FlexGrow = 1,
+                FontSize = 12,
+                MarginRight = 6,
+            },
+            InputBackground = T.InputBg,
+            InputTextColor = T.TextSecondary,
+            InputBorderColor = T.InputBorder,
+            InputFocusBorderColor = T.InputFocusBorder,
+        };
         pathInput.OnValuesChange += t => _vm.FilePathText = t;
         fileRow.AddChild(pathInput);
-        fileRow.AddChild(ActionButton("加载文件", "#30363d", () =>
+        fileRow.AddChild(TextButton("加载文件", SKColorToHex(T.Border), SKColorToHex(T.TextSecondary), () =>
         {
             if (!string.IsNullOrWhiteSpace(_vm.FilePathText)) _vm.LoadFile(_vm.FilePathText.Trim());
         }));
         left.AddChild(fileRow);
 
-        // 代码编辑区
-        var codeArea = new UITextArea
-        {
-            Text = _vm.CodeText,
-            Placeholder = "粘贴十六进制字节流,如:1f 20 03 d5",
-            Rows = 8,
-        };
+        var codeArea = MakeEditor(_vm.CodeText, "粘贴十六进制字节流,如:1f 20 03 d5", 8, 160,
+            t => _vm.CodeText = t);
         codeArea.OnValuesChange += t => _vm.CodeText = t;
-        ApplyEditorStyle(codeArea);
         left.AddChild(codeArea);
 
-        left.AddChild(CardTitle("初始寄存器 (每行: 名 = hex值)"));
-        var regInput = new UITextArea
-        {
-            Text = _vm.InitialRegisterText,
-            Rows = 3,
-        };
+        left.AddChild(Title("初始寄存器 (每行: 名 = hex值)"));
+        var regInput = MakeEditor(_vm.InitialRegisterText, "", 3, 90, t => _vm.InitialRegisterText = t);
         regInput.OnValuesChange += t => _vm.InitialRegisterText = t;
-        ApplyEditorStyle(regInput);
         left.AddChild(regInput);
 
-        left.AddChild(CardTitle("事件 / 插桩 (EventConfig)"));
-        var eventPanel = Panel("row");
-        eventPanel.Style!.FlexWrap = "wrap";
+        left.AddChild(Title("事件 / 插桩 (EventConfig)"));
+        // 块级布局逐行排列,避免 flex wrap 换行高度计算问题
+        var chips = Panel(new DefaultUIStyle { MarginBottom = 10 });
         foreach (var (flag, name) in EventConfigNames.All)
-        {
-            var chip = EventChipTracked(flag, name);
-            eventPanel.AddChild(chip);
-        }
-        left.AddChild(eventPanel);
+            chips.AddChild(EventChip(flag, name));
+        left.AddChild(chips);
 
-        left.AddChild(CardTitle("控制台"));
-        _consoleLabel = MonospaceLabel("");
-        _consoleLabel.Style!.FlexGrow = 1;
-        _consoleLabel.Style.OverflowY = "auto";
-        left.AddChild(_consoleLabel);
+        left.AddChild(Title("控制台"));
+        var consoleStyle = Flex("column");
+        consoleStyle.FlexGrow = 1;
+        consoleStyle.BackgroundColor = T.BoxBg;
+        consoleStyle.BorderRadius = 6;
+        consoleStyle.BorderWidth = 1;
+        consoleStyle.BorderColor = T.Border;
+        consoleStyle.PaddingTop = 8; consoleStyle.PaddingBottom = 8;
+        consoleStyle.PaddingLeft = 10; consoleStyle.PaddingRight = 10;
+        var consoleBox = Panel(consoleStyle);
+        _consoleLabel = Mono("");
+        consoleBox.AddChild(_consoleLabel);
+        left.AddChild(consoleBox);
 
         return left;
     }
@@ -209,78 +349,74 @@ public sealed class MainWindow
     private UIView EventChip(EventConfig flag, string name)
     {
         var active = _vm.Events.HasFlag(flag);
-        var chip = new UILabel { Text = name };
-        var st = chip.Style ??= new DefaultUIStyle();
-        st.BackgroundColor = SKColor.Parse(active ? "#1f6feb" : "#21262d");
-        st.Color = SKColor.Parse(active ? "#ffffff" : "#8b949e");
-        st.BorderRadius = 10;
-        st.PaddingTop = 3;
-        st.PaddingBottom = 3;
-        st.PaddingLeft = 10;
-        st.PaddingRight = 10;
-        st.MarginRight = 6;
-        st.MarginBottom = 6;
-        st.FontSize = 11;
+        var chip = new UILabel
+        {
+            Text = name,
+            Style = ChipStyle(active),
+        };
+        _eventChips.Add((chip, flag));
         chip.OnClick += _ =>
         {
             if (_vm.Events.HasFlag(flag)) _vm.Events &= ~flag;
             else _vm.Events |= flag;
-            UpdateEventChips();
+            foreach (var (label, f) in _eventChips)
+                label.Style = ChipStyle(_vm.Events.HasFlag(f));
         };
         return chip;
     }
 
-    private readonly List<(UILabel Label, EventConfig Flag)> _eventChips = new();
-
-    private UIView EventChipTracked(EventConfig flag, string name)
+    private DefaultUIStyle ChipStyle(bool active) => new()
     {
-        var chip = EventChip(flag, name);
-        _eventChips.Add(((UILabel)chip, flag));
-        return chip;
-    }
-
-    private void UpdateEventChips()
-    {
-        foreach (var (label, flag) in _eventChips)
-        {
-            var active = _vm.Events.HasFlag(flag);
-            var st = label.Style!;
-            st.BackgroundColor = SKColor.Parse(active ? "#1f6feb" : "#21262d");
-            st.Color = SKColor.Parse(active ? "#ffffff" : "#8b949e");
-        }
-    }
+        BackgroundColor = active ? T.ChipActiveBg : T.PanelBg,
+        Color = active ? T.ChipActiveText : T.TextMuted,
+        BorderRadius = 10,
+        BorderWidth = 1,
+        BorderColor = T.Border,
+        PaddingTop = 3, PaddingBottom = 3, PaddingLeft = 10, PaddingRight = 10,
+        MarginRight = 6, MarginBottom = 6,
+        FontSize = 11,
+    };
 
     private UIView BuildRightPanel()
     {
-        var right = Panel("column");
-        right.Style!.FlexGrow = 1;
+        var rightStyle = Flex("column");
+        rightStyle.FlexGrow = 1;
+        var right = Panel(rightStyle);
 
-        // 寄存器面板
-        right.AddChild(CardTitle("寄存器"));
-        _registerLabel = MonospaceLabel(_vm.FormatRegisters());
-        var regContainer = ScrollPanel(220);
-        regContainer.AddChild(_registerLabel);
-        right.AddChild(regContainer);
+        right.AddChild(Title("寄存器"));
+        _registerLabel = Mono(_vm.FormatRegisters());
+        var regBox = ScrollBox(240);
+        regBox.AddChild(ScrollContent(_registerLabel));
+        right.AddChild(regBox);
 
-        // Trace 面板
-        right.AddChild(CardTitle("执行 Trace"));
-        _traceLabel = MonospaceLabel("");
-        var traceContainer = ScrollPanel(260);
-        traceContainer.AddChild(_traceLabel);
-        right.AddChild(traceContainer);
+        right.AddChild(Title("执行 Trace"));
+        _traceLabel = Mono("");
+        var traceBox = ScrollBox(200);
+        traceBox.AddChild(ScrollContent(_traceLabel));
+        right.AddChild(traceBox);
 
-        // 内存查看
-        var memRow = Panel("row");
-        memRow.Style!.AlignItems = "center";
-        memRow.Style.MarginTop = 4;
-        memRow.AddChild(CardTitle("内存"));
-        var addrInput = new UIInput { Text = "0x100000", Placeholder = "地址 (hex)" };
-        var asx = addrInput.Style ??= new DefaultUIStyle();
-        asx.Width = 200;
-        asx.FontSize = 12;
-        asx.MarginLeft = 8;
+        // 内存查看行
+        var memRowStyle = Flex("row", "center");
+        memRowStyle.MarginTop = 2;
+        var memRow = Panel(memRowStyle);
+        memRow.AddChild(Title("内存"));
+        var addrInput = new UIInput
+        {
+            Text = "0x100000",
+            Placeholder = "地址 (hex)",
+            Style = new DefaultUIStyle
+            {
+                Width = 200,
+                FontSize = 12,
+                MarginLeft = 8, MarginRight = 6,
+            },
+            InputBackground = T.InputBg,
+            InputTextColor = T.TextSecondary,
+            InputBorderColor = T.InputBorder,
+            InputFocusBorderColor = T.InputFocusBorder,
+        };
         memRow.AddChild(addrInput);
-        memRow.AddChild(ActionButton("读取", "#1f6feb", () =>
+        memRow.AddChild(TextButton("读取", SKColorToHex(T.Accent), "#ffffff", () =>
         {
             var cleaned = addrInput.Text.Replace("0x", "").Trim();
             if (ulong.TryParse(cleaned, System.Globalization.NumberStyles.HexNumber, null, out var addr))
@@ -291,124 +427,38 @@ public sealed class MainWindow
                     : EmulationViewModel.FormatHexDump(data, addr);
             }
         }));
-        memRow.AddChild(Spacer());
         right.AddChild(memRow);
 
-        _memoryLabel = MonospaceLabel("输入地址后点「读取」查看 256 字节");
-        var memContainer = ScrollPanel(160);
-        memContainer.AddChild(_memoryLabel);
-        right.AddChild(memContainer);
+        _memoryLabel = Mono("输入地址后点「读取」查看 256 字节");
+        var memBox = ScrollBox(150);
+        memBox.AddChild(ScrollContent(_memoryLabel));
+        right.AddChild(memBox);
 
         return right;
     }
 
-    // ============ 状态栏 ============
-
     private UIView BuildStatusBar()
     {
-        var bar = Panel("row");
-        bar.Style!.Height = 34;
-        bar.Style.AlignItems = "center";
-        bar.Style.MarginTop = 6;
-        bar.Style.BackgroundColor = SKColor.Parse("#0d1117");
-        bar.Style.BorderRadius = 6;
-        bar.Style.PaddingLeft = 12;
-        bar.Style.PaddingRight = 12;
+        var barStyle = Flex("row", "center");
+        barStyle.Height = 32;
+        barStyle.MarginTop = 6;
+        barStyle.BackgroundColor = T.BoxBg;
+        barStyle.BorderRadius = 6;
+        barStyle.PaddingLeft = 12; barStyle.PaddingRight = 12;
 
-        _statusLabel = new UILabel { Text = _vm.StatusMessage };
-        var st = _statusLabel.Style ??= new DefaultUIStyle();
-        st.FontSize = 12;
-        st.Color = SKColor.Parse("#3fb950");
+        var bar = Panel(barStyle);
+        _statusLabel = new UILabel
+        {
+            Text = _vm.StatusMessage,
+            Style = new DefaultUIStyle
+            {
+                FontSize = 12,
+                Color = T.Green,
+            },
+        };
         bar.AddChild(_statusLabel);
         return bar;
     }
-
-    // ============ 构建辅助 ============
-
-    private static UIView Panel(string direction)
-    {
-        var view = new UIView();
-        var st = view.Style ??= new DefaultUIStyle();
-        st.Display = "flex";
-        st.FlexDirection = direction;
-        return view;
-    }
-
-    private static UIView ScrollPanel(float height)
-    {
-        var view = Panel("column");
-        var st = view.Style!;
-        st.Height = height;
-        st.OverflowY = "auto";
-        st.BackgroundColor = SKColor.Parse("#0d1117");
-        st.BorderRadius = 6;
-        st.BorderWidth = 1;
-        st.BorderColor = SKColor.Parse("#30363d");
-        st.PaddingTop = 8;
-        st.PaddingBottom = 8;
-        st.PaddingLeft = 10;
-        st.PaddingRight = 10;
-        st.MarginBottom = 8;
-        return view;
-    }
-
-    private static UILabel CardTitle(string text)
-    {
-        var label = new UILabel { Text = text };
-        var st = label.Style ??= new DefaultUIStyle();
-        st.FontSize = 13;
-        st.Color = SKColor.Parse("#58a6ff");
-        st.MarginBottom = 6;
-        st.MarginTop = 4;
-        return label;
-    }
-
-    private static UILabel MonospaceLabel(string text)
-    {
-        var label = new UILabel { Text = text, Wrap = true };
-        var st = label.Style ??= new DefaultUIStyle();
-        st.FontSize = 12;
-        st.Color = SKColor.Parse("#c9d1d9");
-        return label;
-    }
-
-    private static void ApplyEditorStyle(UITextArea area)
-    {
-        var st = area.Style ??= new DefaultUIStyle();
-        st.MarginBottom = 8;
-        area.InputBackground = SKColor.Parse("#0d1117");
-        area.InputTextColor = SKColor.Parse("#c9d1d9");
-        area.InputBorderColor = SKColor.Parse("#30363d");
-        area.InputFocusBorderColor = SKColor.Parse("#1f6feb");
-        area.CursorColor = SKColor.Parse("#58a6ff");
-    }
-
-    private static UIButton ActionButton(string text, string color, Action onClick)
-    {
-        var btn = new UIButton { Text = text };
-        var st = btn.Style ??= new DefaultUIStyle();
-        st.BackgroundColor = SKColor.Parse(color);
-        st.Color = SKColor.Parse("#ffffff");
-        st.BorderRadius = 6;
-        st.PaddingTop = 6;
-        st.PaddingBottom = 6;
-        st.PaddingLeft = 14;
-        st.PaddingRight = 14;
-        st.MarginRight = 6;
-        st.FontSize = 13;
-        btn.OnClick += _ => onClick();
-        return btn;
-    }
-
-    private static UIView Spacer()
-    {
-        var view = new UIView();
-        var st = view.Style ??= new DefaultUIStyle();
-        st.FlexGrow = 1;
-        return view;
-    }
-
-    // ============ 动态刷新 ============
 
     private void RefreshDynamicViews()
     {
