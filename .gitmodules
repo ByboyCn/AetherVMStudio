@@ -1,0 +1,3 @@
+[submodule "native/AetherVM"]
+	path = native/AetherVM
+	url = https://github.com/AetherVM/AetherVM.git
