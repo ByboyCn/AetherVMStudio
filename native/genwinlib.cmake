@@ -5,13 +5,26 @@ set(TMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/genwinlib")
 file(MAKE_DIRECTORY "${TMP_DIR}")
 set(DUMP_TXT "${TMP_DIR}/exports.txt")
 
+if(NOT EXISTS "${LINKER}")
+    message(FATAL_ERROR "LINKER 不存在: ${LINKER}")
+endif()
+if(NOT EXISTS "${DLL}")
+    message(FATAL_ERROR "DLL 不存在: ${DLL}")
+endif()
+
+set(DUMPBIN_CMD "${LINKER}")
+if(DUMPBIN)
+    set(DUMPBIN_CMD "${DUMPBIN}")
+endif()
+
 execute_process(
-    COMMAND "${LINKER}" /DUMP /EXPORTS "${DLL}"
+    COMMAND "${DUMPBIN_CMD}" /DUMP /EXPORTS "${DLL}"
     OUTPUT_FILE "${DUMP_TXT}"
+    ERROR_VARIABLE dump_err
     RESULT_VARIABLE rc
 )
 if(NOT rc EQUAL 0)
-    message(FATAL_ERROR "link /DUMP /EXPORTS 失败: ${rc}")
+    message(FATAL_ERROR "dump 导出表失败 rc=${rc} cmd=${DUMPBIN_CMD} err=${dump_err}")
 endif()
 
 # 解析导出名:导出表格式为 "    ordinal hint RVA       name"
