@@ -35,8 +35,9 @@ if(WIN32)
         OUTPUT "${AETHERVM_IMPLIB}"
         COMMAND "${CMAKE_COMMAND}"
                 -D DLL="${AETHERVM_DLL}"
-                -D LINKER="${LINKER_TOOL}"
-                -D ARCHIVER="${ARCHIVER_TOOL}"
+                -D LINKER="${LINKER}"
+                -D ARCHIVER="${ARCHIVER}"
+                -D DUMPBIN="${DUMPBIN}"
                 -D OUT="${AETHERVM_IMPLIB}"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/genwinlib.cmake"
         DEPENDS "${AETHERVM_DLL}"
@@ -53,5 +54,5 @@ else()
         REQUIRED
     )
     target_link_libraries(aevm_bridge PRIVATE ${AETHERVM_RUNTIME})
+    message(STATUS "AetherVM runtime: ${AETHERVM_RUNTIME}")
 endif()
-message(STATUS "AetherVM runtime: ${AETHERVM_RUNTIME}")
