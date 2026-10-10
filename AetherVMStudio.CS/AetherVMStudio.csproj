@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>AetherVMStudio</RootNamespace>
+    <AssemblyName>AetherVMStudio</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- 跨平台自包含发布时保持默认即可;TCYM.UI 基于 SDL + SkiaSharp,自带各平台原生依赖 -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- TCYM.UI 主框架(请按你实际的 NuGet 源 / 本地包路径调整) -->
+    <PackageReference Include="TCYM.UI" Version="0.1.1.24" />
+    <PackageReference Include="TCYM.UI.Chart" Version="0.1.1.25" />
+    <!-- SkiaSharp 由 TCYM.UI 传递引用(>= 4.152.1),无需显式声明 -->
+    <!-- 本地编译验证桩目录,不参与正式构建 -->
+    <Compile Remove="_compilecheck\**" />
+    <None Remove="_compilecheck\**" />
+  </ItemGroup>
+
+</Project>

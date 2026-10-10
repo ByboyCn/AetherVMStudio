@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+dist/
+*.user
+.vs/
+_probe/
+TCYM-Docs/doc_bundle.js
+TCYM-Docs/doc_jsx.js
+doc_bundle.js
+doc_jsx.js
+doc_index.html
