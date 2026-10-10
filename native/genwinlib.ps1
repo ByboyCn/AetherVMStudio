@@ -7,9 +7,20 @@ param(
     [Parameter(Mandatory)][string]$Out
 )
 
-$exports = & $Dumpbin /EXPORTS $Dll 2>$null | ForEach-Object {
-    if ($_ -match '^\s+[0-9]+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)\s*$') { $Matches[1] }
+# dumpbin 对超长 C++ 修饰名会折行输出:先收集,再把续行拼接回去
+$exports = New-Object System.Collections.Generic.List[string]
+$cur = $null
+foreach ($line in (& $Dumpbin /EXPORTS $Dll 2>$null)) {
+    if ($line -match '^\s*[0-9]+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S.*)$') {
+        if ($cur) { $exports.Add($cur) }
+        $cur = $Matches[1].TrimEnd()
+    }
+    elseif ($cur -and $line -match '^\s*(\S.*)$') {
+        $cur += $Matches[1].Trim()
+    }
 }
+if ($cur) { $exports.Add($cur) }
+$exports = @($exports | Where-Object { $_ })
 if (-not $exports -or $exports.Count -eq 0) {
     throw "未能从 $Dll 解析出导出符号"
 }
