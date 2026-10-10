@@ -18,6 +18,11 @@ target_include_directories(aevm_bridge PRIVATE ${AETHERVM_ROOT}/include)
 if(WIN32)
     # icpp 包内的 AetherVM.dll 无导入库;从导出表现场生成 AetherVM.lib
     find_file(AETHERVM_DLL AetherVM.dll PATHS ${AETHERVM_ROOT}/bin REQUIRED)
+    get_filename_component(AETHERVM_DLL "${AETHERVM_DLL}" ABSOLUTE)
+    message(STATUS "AETHERVM_DLL = ${AETHERVM_DLL}")
+    if(NOT EXISTS "${AETHERVM_DLL}")
+        message(FATAL_ERROR "AetherVM.dll 未找到: ${AETHERVM_DLL}")
+    endif()
 
     # LINKER/ARCHIVER 由 CI 侧用 vswhere 定位后传入,避免解析到 GNU coreutils 的 link.exe
     if(NOT DEFINED LINKER OR NOT DEFINED ARCHIVER)
