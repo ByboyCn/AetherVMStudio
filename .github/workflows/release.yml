@@ -1,19 +1,19 @@
 name: Release
 
-# 瑙﹀彂鏂瑰紡:
-#   1. 鎺ㄩ€?tag(濡?v0.1.0)鈫?鑷姩鏋勫缓鍏钩鍙板苟鍙戝竷鍒?GitHub Release
-#   2. 鎵嬪姩 workflow_dispatch 鈫?鍙€夊紑鍏?
-#        use_aot       浣跨敤 NativeAOT 鍙戝竷(榛樿鍏抽棴;TCYM.UI 璧板弽灏?濡傞亣涓嶅吋瀹硅鐢ㄦ櫘閫氬彂甯?
-#        bundle_engine 鍚屾椂缂栬瘧 AetherVM C++ 妗ユ帴搴撳苟鎵撳寘杩涘簲鐢?榛樿寮€鍚?澶辫触鑷姩鍥為€€ DemoEngine)
+# 触发方式:
+#   1. 推送 tag(如 v0.2.0)→ 自动构建六平台并直接上传到 GitHub Release
+#   2. 手动 workflow_dispatch → 可选开关:
+#        use_aot       NativeAOT 发布(实验性)
+#        bundle_engine 编译 AetherVM C++ 桥接库并打包(默认开启;失败自动回退 DemoEngine)
 on:
   workflow_dispatch:
     inputs:
       use_aot:
-        description: "浣跨敤 NativeAOT 鍙戝竷(瀹為獙鎬?"
+        description: "使用 NativeAOT 发布(实验性)"
         type: boolean
         default: false
       bundle_engine:
-        description: "缂栬瘧骞舵墦鍖?AetherVM C++ 寮曟搸妗ユ帴搴?
+        description: "编译并打包 AetherVM C++ 引擎桥接库"
         type: boolean
         default: true
   push:
@@ -27,9 +27,11 @@ permissions:
   contents: write
 
 jobs:
-  # ============ AetherVM C++ 妗ユ帴搴撴瀯寤?============
-  # AetherVM 浠ュ瓙妯″潡(v0.2.0)閿佸畾;鐢ㄥ畼鏂?icpp 棰勭紪璇戝寘鑷妇鏋勫缓寮曟搸,
-  # 鍐嶇紪璇?native/AetherVMBridge.cpp 寰楀埌 aevm_bridge 鍔ㄦ€佸簱銆?  # 浠讳綍涓€姝ュけ璐ラ兘涓嶉樆濉炲彂甯?搴旂敤鑷姩鍥為€€鍒板唴缃?DemoEngine)銆?  engine:
+  # ============ AetherVM C++ 桥接库构建 ============
+  # AetherVM 以子模块(v0.2.0)锁定;引擎运行库来自 icpp 官方预编译包;
+  # 桥接层(native/AetherVMBridge.cpp)必须用 icpp 的 clang 编译以匹配 libc++ ABI。
+  # 任何一步失败都不阻塞发布(应用自动回退到内置 DemoEngine)。
+  engine:
     name: Build AetherVM bridge (${{ matrix.artifact }})
     if: ${{ github.event_name == 'push' || github.event.inputs.bundle_engine == 'true' }}
     runs-on: ${{ matrix.os }}
@@ -38,43 +40,40 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest,      artifact: aevm_bridge-win-x64,     icpp: icpp-v0.4.0-windows-x86_64.tar.gz }
-          - { os: macos-latest,        artifact: aevm_bridge-osx-arm64,   icpp: icpp-v0.4.0-macos-arm64.tar.gz }
-          - { os: ubuntu-latest,       artifact: aevm_bridge-linux-x64,   icpp: icpp-v0.4.0-linux-x86_64.tar.gz }
-          - { os: ubuntu-24.04-arm,    artifact: aevm_bridge-linux-arm64, icpp: icpp-v0.4.0-linux-aarch64.tar.gz }
+          - { os: windows-latest,   artifact: aevm_bridge-win-x64,      icpp: icpp-v0.4.0-windows-x86_64.tar.gz }
+          - { os: macos-latest,     artifact: aevm_bridge-osx-arm64,    icpp: icpp-v0.4.0-macos-arm64.tar.gz }
+          - { os: ubuntu-latest,    artifact: aevm_bridge-linux-x64,    icpp: icpp-v0.4.0-linux-x86_64.tar.gz }
+          - { os: ubuntu-24.04-arm, artifact: aevm_bridge-linux-arm64,  icpp: icpp-v0.4.0-linux-aarch64.tar.gz }
     steps:
       - name: Checkout (with AetherVM v0.2.0 submodule)
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      # icpp 棰勭紪璇戝寘鍐呭惈 v0.2.0 鐨?AetherVM 澶存枃浠?include/aevm)涓庡姩鎬佸簱(bin|lib),
-      # 鏃犻渶浠庢簮鐮佹瀯寤哄紩鎿?妗ユ帴灞傜洿鎺ュ AetherVM 鍔ㄦ€佸簱閾炬帴銆?      - name: Download icpp package (with AetherVM runtime)
+      - name: Download icpp package (with AetherVM runtime)
         shell: bash
         run: |
           mkdir -p aethervm
           curl -L --fail --retry 3 -o aethervm/icpp.tar.gz \
             "https://github.com/vpand/icpp/releases/download/v0.4.0/${{ matrix.icpp }}"
           tar -xzf aethervm/icpp.tar.gz -C aethervm
-          # 浠?include/aevm/AetherVM.h 瀹氫綅鍖呮牴鐩綍(鍚勫钩鍙板寘甯冨眬涓€鑷?
           hdr="$(find aethervm -type f -name AetherVM.h -path '*aevm*' | head -1)"
-          [ -z "$hdr" ] && { echo "::error::瑙ｅ寘鍚庢湭鎵惧埌 include/aevm/AetherVM.h"; tar -tzf aethervm/icpp.tar.gz | head -10; exit 1; }
+          [ -z "$hdr" ] && { echo "::error::icpp 包中未找到 include/aevm/AetherVM.h"; tar -tzf aethervm/icpp.tar.gz | head -10; exit 1; }
           echo "AETHERVM_ROOT=$(cd "$(dirname "$hdr")/../.." && (pwd -W 2>/dev/null || pwd))" >> $GITHUB_ENV
-          ls "$(cd "$(dirname "$hdr")/../.." && pwd)"
 
-      - name: Locate MSVC tools and generate AetherVM.lib (Windows)
+      # Windows:AetherVM.dll / AetherBinary.dll 无导入库,用 dumpbin+lib 现场生成
+      - name: Generate import libraries (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $dir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'VC/Tools/MSVC/**/bin/Hostx64/x64' | Select-Object -First 1
-          & native/genwinlib.ps1 -Dll "aethervm/icpp-v0.4.0-windows-x86_64/bin/AetherVM.dll" `
-            -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherVM.lib"
-          & native/genwinlib.ps1 -Dll "aethervm/icpp-v0.4.0-windows-x86_64/bin/AetherBinary.dll" `
-            -Dumpbin "$dir\dumpbin.exe" -Lib "$dir\lib.exe" -Out "native/prebuilt/AetherBinary.lib"
-          "AETHERVM_IMPLIB=$(Resolve-Path native/prebuilt/AetherVM.lib)" >> $env:GITHUB_ENV
+          $dir = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -find 'VC/Tools/MSVC/**/bin/Hostx64/x64' | Select-Object -First 1
+          native/genwinlib.ps1 -Dll "$env:AETHERVM_ROOT/bin/AetherVM.dll" `
+            -Dumpbin "$dir/dumpbin.exe" -Lib "$dir/lib.exe" -Out "native/prebuilt/AetherVM.lib"
+          native/genwinlib.ps1 -Dll "$env:AETHERVM_ROOT/bin/AetherBinary.dll" `
+            -Dumpbin "$dir/dumpbin.exe" -Lib "$dir/lib.exe" -Out "native/prebuilt/AetherBinary.lib"
 
-      # Windows 蹇呴』鐢?icpp 鑷甫鐨?clang(libc++ ABI 涓?AetherVM.dll 鍖归厤),涓嶈兘鐢?MSVC STL
       - name: Build bridge library (Windows, icpp clang++)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -92,8 +91,7 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          args=(-DAETHERVM_ROOT="$AETHERVM_ROOT" -DCMAKE_BUILD_TYPE=Release)
-          cmake -S native -B native/build "${args[@]}"
+          cmake -S native -B native/build -DCMAKE_BUILD_TYPE=Release -DAETHERVM_ROOT="$AETHERVM_ROOT"
           cmake --build native/build --config Release
           mkdir -p out
           find native/build -type f -name "libaevm_bridge.*" -exec cp {} out/ \;
@@ -102,8 +100,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p out
-          find native/build -type f \( -name "libaevm_bridge.*" \) -exec cp {} out/ \; 2>/dev/null || true
-          # AetherVM 杩愯搴撱€佷緷璧栦笌璇箟 bitcode 涓€骞舵墦鍖?搴旂敤鎸夐渶鍔犺浇)
+          find native/build -type f -name "libaevm_bridge.*" -exec cp {} out/ \; 2>/dev/null || true
           if [ "$RUNNER_OS" = "Windows" ]; then
             cp "$AETHERVM_ROOT"/bin/AetherVM.dll "$AETHERVM_ROOT"/bin/AetherBinary.dll out/
             cp -r "$AETHERVM_ROOT"/bin/bitcode out/bitcode
@@ -121,7 +118,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-  # ============ 搴旂敤鏋勫缓 ============
+  # ============ 应用构建 ============
   build:
     name: Build ${{ matrix.rid }}
     needs: [engine]
@@ -153,12 +150,12 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.use_aot }}" = "true" ]; then
             echo "aot=true" >> $GITHUB_OUTPUT
-            echo "::warning::NativeAOT 涓哄疄楠屾€?TCYM.UI/SkiaSharp 鑻ヤ笉鍏煎璇锋敼鐢ㄦ櫘閫氬彂甯?
+            echo "::warning::NativeAOT 为实验性,TCYM.UI/SkiaSharp 若不兼容请改用普通发布"
           else
             echo "aot=false" >> $GITHUB_OUTPUT
           fi
 
-      # 寮曠敤鐨?TCYM.UI / SDL3 / SkiaSharp 鍏ㄩ儴鍐呭祵;AOT 鏃剁鐢ㄥ崟鏂囦欢鑷В鍘?AOT 鏈韩灏辨槸鍘熺敓浜岃繘鍒?
+      # 自包含单文件发布:TCYM.UI / SDL3 / SkiaSharp native 依赖全部内嵌
       - name: Publish
         run: >
           dotnet publish ${{ env.PROJECT }}
@@ -171,7 +168,7 @@ jobs:
           -p:DebugSymbols=false
           -o publish
 
-      # 鎶婂紩鎿庢ˉ鎺ュ簱骞跺叆鍖?鏈夊垯甯︿笂,娌℃湁鍒欏簲鐢ㄥ洖閫€ DemoEngine)
+      # 把引擎桥接库并入包(有则带上,没有则应用回退 DemoEngine)
       - name: Try download AetherVM bridge library
         if: ${{ needs.engine.result == 'success' }}
         uses: actions/download-artifact@v4
@@ -195,12 +192,8 @@ jobs:
             cp -r engine_pick/. publish/
             echo "AetherVM bridge bundled"
           else
-            echo "::notice::鏃犲紩鎿庡簱,鏈寘浣跨敤鍐呯疆 DemoEngine"
+            echo "::notice::无引擎库,本包使用内置 DemoEngine"
           fi
-
-      - name: Show publish output
-        shell: bash
-        run: ls -la publish/
 
       # ---------- Windows ----------
       - name: Package (Windows)
@@ -209,7 +202,7 @@ jobs:
         run: |
           $dir = "${{ env.APP_NAME }}-${{ matrix.rid }}"
           Copy-Item publish "$dir" -Recurse
-          Copy-Item AetherVMStudio.CS/README.md "$dir/浣跨敤璇存槑.md"
+          Copy-Item AetherVMStudio.CS/README.md "$dir/README.md"
           Compress-Archive -Path "$dir" -DestinationPath "$dir.zip"
           echo "PACKAGE=$dir.zip" >> $env:GITHUB_ENV
 
@@ -221,7 +214,6 @@ jobs:
           APP="${{ env.APP_NAME }}.app"
           mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
           cp publish/${{ env.APP_NAME }} "$APP/Contents/MacOS/${{ env.APP_NAME }}"
-          # 寮曟搸搴撲笌 AetherVM 杩愯搴撲竴骞舵斁杩?.app
           if [ -d engine_lib ]; then
             cp -v engine_lib/lib*.dylib "$APP/Contents/MacOS/" 2>/dev/null || true
             cp -r engine_lib/bitcode "$APP/Contents/MacOS/bitcode" 2>/dev/null || true
@@ -244,12 +236,14 @@ jobs:
           </dict>
           </plist>
           PLIST
-          cat > "$APP/浣跨敤璇存槑.txt" <<'README'
+          cat > "$APP/README.txt" <<'README'
           AetherVM Studio (macOS)
 
-          棣栨杩愯:鍦?Finder 涓弻鍑?AetherVMStudio.app銆?          鑻ユ彁绀?鏃犳硶楠岃瘉寮€鍙戣€?,璇峰湪缁堢鎵ц:
+          双击 AetherVMStudio.app 运行。
+          若提示"无法验证开发者",请在终端执行:
             xattr -cr /path/to/AetherVMStudio.app
-          鐒跺悗鍐嶆鍙屽嚮鍗冲彲銆傛湰鍖呬负鑷寘鍚?鏃犻渶瀹夎 .NET銆?          README
+          然后再次双击即可。本包为自包含,无需安装 .NET。
+          README
           dest="${{ env.APP_NAME }}-${{ matrix.rid }}.zip"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$dest"
           echo "PACKAGE=$dest" >> $GITHUB_ENV
@@ -263,23 +257,23 @@ jobs:
           mkdir -p "$dir"
           cp publish/${{ env.APP_NAME }} "$dir/"
           if [ -d engine_lib ]; then
-            cp -v engine_lib/lib*.dylib "$dir/" 2>/dev/null || true
+            cp -v engine_lib/lib*.so* "$dir/" 2>/dev/null || true
             cp -r engine_lib/bitcode "$dir/bitcode" 2>/dev/null || true
           fi
           chmod +x "$dir/${{ env.APP_NAME }}"
-          cp AetherVMStudio.CS/README.md "$dir/浣跨敤璇存槑.md"
-          cat > "$dir/鍚姩.sh" <<'SH'
+          cp AetherVMStudio.CS/README.md "$dir/README.md"
+          cat > "$dir/start.sh" <<'SH'
           #!/bin/bash
           cd "$(dirname "$0")"
-          # Ubuntu 22+/Debian 缂?SDL 杩愯搴撴椂:
+          # Ubuntu 22+/Debian 缺 SDL 运行库时:
           #   sudo apt install -y libsdl3-0 libxcb-cursor0
           ./AetherVMStudio
           SH
-          chmod +x "$dir/鍚姩.sh"
+          chmod +x "$dir/start.sh"
           tar -czf "${{ env.APP_NAME }}-${{ matrix.rid }}.tar.gz" "$dir"
           echo "PACKAGE=${{ env.APP_NAME }}-${{ matrix.rid }}.tar.gz" >> $GITHUB_ENV
 
-      # tag 鏋勫缓:鐩存帴涓婁紶鍒?GitHub Release(涓嶇粡杩?artifacts,閬垮厤瀛樺偍閰嶉闄愬埗)
+      # tag 构建:直接上传到 GitHub Release(不经过 artifacts,避免存储配额限制)
       - name: Upload to Release
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
@@ -295,7 +289,7 @@ jobs:
             echo "retry $i..."; sleep 30
           done
 
-      # 鎵嬪姩瑙﹀彂:璧?artifacts(1 澶╀繚鐣?
+      # 手动触发:走 artifacts(1 天保留)
       - name: Upload artifact
         if: github.event_name != 'push'
         uses: actions/upload-artifact@v4
@@ -303,5 +297,4 @@ jobs:
           name: ${{ env.APP_NAME }}-${{ matrix.rid }}
           path: ${{ env.PACKAGE }}
           if-no-files-found: error
-          retention-days: 1
           retention-days: 1
