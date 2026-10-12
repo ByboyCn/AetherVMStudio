@@ -122,6 +122,7 @@ jobs:
           name: ${{ matrix.artifact }}
           path: out/*
           if-no-files-found: ignore
+          retention-days: 1
 
   # ============ 应用构建 ============
   build:
@@ -289,6 +290,7 @@ jobs:
           name: ${{ env.APP_NAME }}-${{ matrix.rid }}
           path: ${{ env.PACKAGE }}
           if-no-files-found: error
+          retention-days: 1
 
   release:
     name: Create GitHub Release
