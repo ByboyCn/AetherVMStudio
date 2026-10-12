@@ -1,0 +1,207 @@
+﻿Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	﻿2026-10-12T09:19:40.9732031Z ##[group]Run actions/upload-artifact@v4
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9732455Z with:
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9732803Z   name: aevm_bridge-linux-arm64
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9733065Z   path: out/*
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9733314Z   if-no-files-found: ignore
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9733601Z   compression-level: 6
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9733846Z   overwrite: false
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9734695Z   include-hidden-files: false
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9734960Z env:
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9735238Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9735596Z   APP_NAME: AetherVMStudio
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9736061Z   AETHERVM_ROOT: /home/runner/work/AetherVMStudio/AetherVMStudio/aethervm/icpp-v0.4.0-linux-aarch64
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:40.9736583Z ##[endgroup]
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:41.1132336Z (node:2388) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:41.1133419Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:41.1246472Z With the provided path, there will be 5 files uploaded
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:41.1250303Z Artifact name is valid!
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:41.1252199Z Root directory input is valid!
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	2026-10-12T09:19:41.2375153Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build AetherVM bridge (aevm_bridge-linux-arm64)	Upload bridge library	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	﻿2026-10-12T09:19:40.6367192Z ##[group]Run actions/upload-artifact@v4
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6367513Z with:
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6367715Z   name: aevm_bridge-linux-x64
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6367958Z   path: out/*
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6368172Z   if-no-files-found: ignore
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6368419Z   compression-level: 6
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6368641Z   overwrite: false
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6369014Z   include-hidden-files: false
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6369290Z env:
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6369536Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6369865Z   APP_NAME: AetherVMStudio
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6370313Z   AETHERVM_ROOT: /home/runner/work/AetherVMStudio/AetherVMStudio/aethervm/icpp-v0.4.0-linux-x86_64
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.6370790Z ##[endgroup]
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.8136418Z (node:2432) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.8138035Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.8310613Z With the provided path, there will be 5 files uploaded
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.8352623Z Artifact name is valid!
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.8353699Z Root directory input is valid!
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	2026-10-12T09:19:40.9323502Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build AetherVM bridge (aevm_bridge-linux-x64)	Upload bridge library	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	﻿2026-10-12T09:19:43.1241730Z ##[group]Run actions/upload-artifact@v4
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1241930Z with:
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242050Z   name: aevm_bridge-osx-arm64
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242210Z   path: out/*
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242350Z   if-no-files-found: ignore
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242530Z   compression-level: 6
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242670Z   overwrite: false
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242820Z   include-hidden-files: false
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1242980Z env:
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1243160Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1243420Z   APP_NAME: AetherVMStudio
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1243760Z   AETHERVM_ROOT: /Users/runner/work/AetherVMStudio/AetherVMStudio/aethervm/icpp-v0.4.0-macos-arm64
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.1244100Z ##[endgroup]
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.2636160Z (node:7287) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.2644780Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.2686010Z With the provided path, there will be 5 files uploaded
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.2689280Z Artifact name is valid!
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.2689640Z Root directory input is valid!
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	2026-10-12T09:19:43.3310400Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build AetherVM bridge (aevm_bridge-osx-arm64)	Upload bridge library	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	﻿2026-10-12T09:20:08.8267899Z ##[group]Run actions/upload-artifact@v4
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8268253Z with:
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8268455Z   name: aevm_bridge-win-x64
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8268668Z   path: out/*
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8268849Z   if-no-files-found: ignore
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8269066Z   compression-level: 6
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8269254Z   overwrite: false
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8269438Z   include-hidden-files: false
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8269691Z env:
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8269895Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8270182Z   APP_NAME: AetherVMStudio
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8270549Z   AETHERVM_ROOT: D:/a/AetherVMStudio/AetherVMStudio/aethervm/icpp-v0.4.0-windows-x86_64
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8271113Z   AETHERVM_IMPLIB: D:\a\AetherVMStudio\AetherVMStudio\native\prebuilt\AetherVM.lib
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:08.8271494Z ##[endgroup]
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:09.2290008Z (node:7780) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:09.2291318Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:09.2293566Z With the provided path, there will be 7 files uploaded
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:09.2294277Z Artifact name is valid!
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:09.2294635Z Root directory input is valid!
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	2026-10-12T09:20:09.3042051Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build AetherVM bridge (aevm_bridge-win-x64)	Upload bridge library	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build win-arm64	Upload artifact	﻿2026-10-12T09:21:17.8612931Z ##[group]Run actions/upload-artifact@v4
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8613323Z with:
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8613570Z   name: AetherVMStudio-win-arm64
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8613841Z   path: AetherVMStudio-win-arm64.zip
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8614110Z   if-no-files-found: error
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8614342Z   compression-level: 6
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8614554Z   overwrite: false
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8614760Z   include-hidden-files: false
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8614979Z env:
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8615198Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8615821Z   APP_NAME: AetherVMStudio
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8616059Z   DOTNET_ROOT: C:\Program Files\dotnet
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8616332Z   PACKAGE: AetherVMStudio-win-arm64.zip
+Build win-arm64	Upload artifact	2026-10-12T09:21:17.8616597Z ##[endgroup]
+Build win-arm64	Upload artifact	2026-10-12T09:21:18.1307083Z (node:4424) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build win-arm64	Upload artifact	2026-10-12T09:21:18.1308220Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build win-arm64	Upload artifact	2026-10-12T09:21:18.2607466Z With the provided path, there will be 1 file uploaded
+Build win-arm64	Upload artifact	2026-10-12T09:21:18.2608666Z Artifact name is valid!
+Build win-arm64	Upload artifact	2026-10-12T09:21:18.2609305Z Root directory input is valid!
+Build win-arm64	Upload artifact	2026-10-12T09:21:18.2618245Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build win-arm64	Upload artifact	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build linux-x64	Upload artifact	﻿2026-10-12T09:20:40.5769525Z ##[group]Run actions/upload-artifact@v4
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5769845Z with:
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5770051Z   name: AetherVMStudio-linux-x64
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5770348Z   path: AetherVMStudio-linux-x64.tar.gz
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5770635Z   if-no-files-found: error
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5770872Z   compression-level: 6
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5771087Z   overwrite: false
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5771296Z   include-hidden-files: false
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5771528Z env:
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5771754Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5772370Z   APP_NAME: AetherVMStudio
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5772623Z   DOTNET_ROOT: /usr/share/dotnet
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5772907Z   PACKAGE: AetherVMStudio-linux-x64.tar.gz
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.5773180Z ##[endgroup]
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.7480506Z (node:2380) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.7482535Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.7592813Z With the provided path, there will be 1 file uploaded
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.7627088Z Artifact name is valid!
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.7647429Z Root directory input is valid!
+Build linux-x64	Upload artifact	2026-10-12T09:20:40.8372778Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build linux-x64	Upload artifact	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build win-x64	Upload artifact	﻿2026-10-12T09:21:25.9567190Z ##[group]Run actions/upload-artifact@v4
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9567564Z with:
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9567771Z   name: AetherVMStudio-win-x64
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9568067Z   path: AetherVMStudio-win-x64.zip
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9568315Z   if-no-files-found: error
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9568536Z   compression-level: 6
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9568738Z   overwrite: false
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9568943Z   include-hidden-files: false
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9569156Z env:
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9569366Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9569669Z   APP_NAME: AetherVMStudio
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9569894Z   DOTNET_ROOT: C:\Program Files\dotnet
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9570309Z   PACKAGE: AetherVMStudio-win-x64.zip
+Build win-x64	Upload artifact	2026-10-12T09:21:25.9570565Z ##[endgroup]
+Build win-x64	Upload artifact	2026-10-12T09:21:26.1888433Z (node:8560) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build win-x64	Upload artifact	2026-10-12T09:21:26.1912272Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build win-x64	Upload artifact	2026-10-12T09:21:26.2192915Z With the provided path, there will be 1 file uploaded
+Build win-x64	Upload artifact	2026-10-12T09:21:26.2202317Z Artifact name is valid!
+Build win-x64	Upload artifact	2026-10-12T09:21:26.2206790Z Root directory input is valid!
+Build win-x64	Upload artifact	2026-10-12T09:21:26.3313756Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build win-x64	Upload artifact	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build linux-arm64	Upload artifact	﻿2026-10-12T09:20:46.1484959Z ##[group]Run actions/upload-artifact@v4
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1485299Z with:
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1485515Z   name: AetherVMStudio-linux-arm64
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1485838Z   path: AetherVMStudio-linux-arm64.tar.gz
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1486139Z   if-no-files-found: error
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1486376Z   compression-level: 6
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1486592Z   overwrite: false
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1486811Z   include-hidden-files: false
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1487041Z env:
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1487269Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1487584Z   APP_NAME: AetherVMStudio
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1487825Z   DOTNET_ROOT: /usr/share/dotnet
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1488114Z   PACKAGE: AetherVMStudio-linux-arm64.tar.gz
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.1488413Z ##[endgroup]
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.3300090Z (node:2383) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.3302150Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.3386969Z With the provided path, there will be 1 file uploaded
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.3389178Z Artifact name is valid!
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.3389996Z Root directory input is valid!
+Build linux-arm64	Upload artifact	2026-10-12T09:20:46.5886610Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build linux-arm64	Upload artifact	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build osx-arm64	Upload artifact	﻿2026-10-12T09:20:48.2139610Z ##[group]Run actions/upload-artifact@v4
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2139810Z with:
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2139940Z   name: AetherVMStudio-osx-arm64
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2140120Z   path: AetherVMStudio-osx-arm64.zip
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2140290Z   if-no-files-found: error
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2140440Z   compression-level: 6
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2140580Z   overwrite: false
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2140710Z   include-hidden-files: false
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2140860Z env:
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2141000Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2141210Z   APP_NAME: AetherVMStudio
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2141360Z   DOTNET_ROOT: /Users/runner/.dotnet
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2141540Z   PACKAGE: AetherVMStudio-osx-arm64.zip
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.2141710Z ##[endgroup]
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.3472450Z (node:1713) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.3473150Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.3499730Z With the provided path, there will be 1 file uploaded
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.3502410Z Artifact name is valid!
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.3503170Z Root directory input is valid!
+Build osx-arm64	Upload artifact	2026-10-12T09:20:48.4503760Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build osx-arm64	Upload artifact	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
+Build osx-x64	Upload artifact	﻿2026-10-12T09:20:50.5829120Z ##[group]Run actions/upload-artifact@v4
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5829430Z with:
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5829610Z   name: AetherVMStudio-osx-x64
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5829840Z   path: AetherVMStudio-osx-x64.zip
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5830090Z   if-no-files-found: error
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5830290Z   compression-level: 6
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5830480Z   overwrite: false
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5830680Z   include-hidden-files: false
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5830860Z env:
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5831070Z   PROJECT: AetherVMStudio.CS/AetherVMStudio.csproj
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5831360Z   APP_NAME: AetherVMStudio
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5831550Z   DOTNET_ROOT: /Users/runner/.dotnet
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5831800Z   PACKAGE: AetherVMStudio-osx-x64.zip
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.5832120Z ##[endgroup]
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.7535950Z (node:2108) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.7536720Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.7564900Z With the provided path, there will be 1 file uploaded
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.7567390Z Artifact name is valid!
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.7568110Z Root directory input is valid!
+Build osx-x64	Upload artifact	2026-10-12T09:20:50.8621950Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+Build osx-x64	Upload artifact	More info on storage limits: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending
