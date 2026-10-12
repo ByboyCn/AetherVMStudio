@@ -203,6 +203,7 @@ jobs:
           $dir = "${{ env.APP_NAME }}-${{ matrix.rid }}"
           Copy-Item publish "$dir" -Recurse
           Copy-Item AetherVMStudio.CS/README.md "$dir/README.md"
+          Copy-Item LICENSE,THIRD-PARTY-NOTICES.md "$dir/"
           Compress-Archive -Path "$dir" -DestinationPath "$dir.zip"
           echo "PACKAGE=$dir.zip" >> $env:GITHUB_ENV
 
@@ -219,6 +220,7 @@ jobs:
             cp -r engine_lib/bitcode "$APP/Contents/MacOS/bitcode" 2>/dev/null || true
           fi
           chmod +x "$APP/Contents/MacOS/"*
+          cp LICENSE THIRD-PARTY-NOTICES.md "$APP/"
           cat > "$APP/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -262,6 +264,7 @@ jobs:
           fi
           chmod +x "$dir/${{ env.APP_NAME }}"
           cp AetherVMStudio.CS/README.md "$dir/README.md"
+          cp LICENSE THIRD-PARTY-NOTICES.md "$dir/"
           cat > "$dir/start.sh" <<'SH'
           #!/bin/bash
           cd "$(dirname "$0")"
